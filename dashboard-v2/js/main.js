@@ -15,7 +15,7 @@ const lockBtn = document.getElementById('lock-btn');
 const rolePill = document.getElementById('role-pill');
 
 function showLogin(message) {
-  overlay.classList.remove('hidden');
+  document.querySelectorAll('.nav-item[data-surface]').forEach(n => { n.style.display = ''; }); wireSurfaceRouter._done = false; overlay.classList.remove('hidden');
   pinInput.value = '';
   if (message) pinErr.textContent = message;
   setTimeout(() => pinInput.focus(), 50);
