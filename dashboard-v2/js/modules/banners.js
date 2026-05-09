@@ -370,21 +370,29 @@ function openForm(b) {
   ['f-title','f-sub','f-bg','f-text','f-btn'].forEach(id =>
     modalBody.querySelector('#' + id).addEventListener('input', refreshPreview));
 
-  // Image upload
+  // Image upload — gates the Save button so a failed upload can't be saved
+  // silently with a stale or missing image_url.
+  const saveBtn = modalBody.querySelector('[data-act="save"]');
   modalBody.querySelector('#f-img').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const status = modalBody.querySelector('#f-img-status');
+    const urlField = modalBody.querySelector('#f-img-url');
     status.textContent = 'Uploading…';
+    status.style.color = 'var(--text-muted)';
+    urlField.value = '';
+    saveBtn.disabled = true;
     try {
       const url = await uploadBannerImage(file);
-      modalBody.querySelector('#f-img-url').value = url;
+      urlField.value = url;
       const img = modalBody.querySelector('#f-img-prev');
       img.src = url; img.style.display = '';
       status.textContent = 'Uploaded ✓'; status.style.color = 'var(--green)';
+      saveBtn.disabled = false;
     } catch (err) {
       status.textContent = err.message || 'Upload failed';
       status.style.color = 'var(--red)';
+      // urlField stays empty; saveBtn stays disabled until a successful retry.
     }
   });
 
@@ -399,7 +407,9 @@ function openForm(b) {
 async function save(existing) {
   const sb = getSB();
   const url = modalBody.querySelector('#f-img-url').value.trim();
-  if (!url) return toastWarn('Image is required.');
+  // Required only when creating; edits may legitimately have no image yet
+  // (e.g. legacy rows where image_url is null) and only tweak title/sort/etc.
+  if (!existing && !url) return toastWarn('Image is required.');
 
   const placement = modalBody.querySelector('input[name="f-placement"]:checked').value;
   let category_name = null;
@@ -412,7 +422,7 @@ async function save(existing) {
   const payload = {
     title: modalBody.querySelector('#f-title').value.trim() || null,
     subtitle: modalBody.querySelector('#f-sub').value.trim() || null,
-    image_url: url,
+    image_url: url || null,
     link_url: modalBody.querySelector('#f-link').value.trim() || null,
     button_text: modalBody.querySelector('#f-btn').value.trim() || null,
     bg_color: modalBody.querySelector('#f-bg').value || null,
