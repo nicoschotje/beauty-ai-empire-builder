@@ -4,6 +4,7 @@ import { tryLogin, getSession, clearSession, startIdleTimer } from './core/auth.
 import { createSB } from './core/supabase.js';
 import { subscribeRealtime, unsubscribeRealtime } from './core/realtime.js';
 import { toast, toastError } from './core/toast.js';
+import { loadStoreSettings, applyBranding } from './core/settings.js';
 
 const overlay = document.getElementById('login-overlay');
 const pinInput = document.getElementById('pin-input');
@@ -28,6 +29,9 @@ function hideLogin() {
 async function handleLogin(role, session) {
   rolePill.textContent = role;
   rolePill.style.color = role === 'owner' ? 'var(--green)' : 'var(--orange)';
+
+  // Load store branding/config — owner may have rebranded since last session
+  await loadStoreSettings();
 
   // Subscribe to realtime — sales gets limited subscription
   subscribeRealtime(role);
@@ -76,6 +80,9 @@ lockBtn.addEventListener('click', () => {
   showLogin('Locked.');
 });
 
+// Paint defaults immediately so the brand never flashes blank
+applyBranding();
+
 // Resume session if still valid
 (async function boot() {
   const sess = getSession();
@@ -89,6 +96,14 @@ lockBtn.addEventListener('click', () => {
       console.warn('Session resume failed:', e);
       clearSession();
     }
+  }
+  // Pre-login: read store_settings with the anon key (storefront does the
+  // same — it's public branding). If it fails, defaults from settings.js stay.
+  try {
+    createSB(''); // anon, no admin secret
+    await loadStoreSettings();
+  } catch (e) {
+    console.warn('Pre-login settings load failed:', e?.message || e);
   }
   showLogin();
 })();

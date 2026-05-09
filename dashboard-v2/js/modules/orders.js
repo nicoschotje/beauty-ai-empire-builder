@@ -233,6 +233,9 @@ function openDetail(order) {
 
 function printReceipt(order) {
   const items = Array.isArray(order.order_items) ? order.order_items : [];
+  const settings = AppState.settings || {};
+  const storeName = settings.store_name || "Mr. Beanie's Greenies";
+  const storeFooter = [settings.store_phone, settings.store_address].filter(Boolean).join(' · ');
   const html = `
     <html><head><title>Receipt #${shortId(order.id)}</title>
     <style>
@@ -242,7 +245,8 @@ function printReceipt(order) {
       td{padding:4px 0;border-bottom:1px dashed #ccc;font-size:13px}
       .total{font-weight:700;border-top:2px solid #000;padding-top:6px}
     </style></head><body>
-      <h1>Mr. Beanie's Greenies</h1>
+      <h1>${escapeHTML(storeName)}</h1>
+      ${storeFooter ? `<div class="muted">${escapeHTML(storeFooter)}</div>` : ''}
       <div class="muted">Order #${shortId(order.id)} · ${escapeHTML(formatDate(order.created_at))}</div>
       <p>${escapeHTML(order.customer_name || '')}<br>${escapeHTML(order.customer_phone || order.contact || '')}<br>${escapeHTML(order.delivery_address || '')}</p>
       <table>
