@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pink Rabbits CMS — Admin</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; media-src blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --obsidian:#080808; --onyx:#0F0F0F; --charcoal:#161616;
+  --gold:#C4A962; --gold-light:#D4BE7E; --gold-muted:#8B7740;
+  --rose:#B87D7D; --cream:#E8E0D5; --pearl:#999999;
+  --success:#6B9E7A; --danger:#C45454;
+  --border:rgba(196,169,98,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--obsidian);color:var(--cream);font-family:'Inter',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;min-height:100vh}
+body{font-size:14px;line-height:1.5}
+img,video{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-weight:300;background:var(--obsidian);border:1px solid var(--border);color:var(--cream);padding:10px 12px;border-radius:4px;width:100%;font-size:13px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
+.label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-muted);margin-bottom:6px;display:block}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:300;color:var(--cream)}
+h1{font-size:32px;letter-spacing:-.5px}
+h2{font-size:22px}
+h3{font-size:18px}
+.serif{font-family:'Cormorant Garamond',serif;font-weight:300}
+.tnum{font-feature-settings:'tnum' 1}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;background:var(--gold);color:var(--obsidian);transition:background .15s}
+.btn:hover{background:var(--gold-light)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--cream)}
+.btn-ghost:hover{border-color:var(--gold);background:rgba(196,169,98,.05)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:6px 12px;font-size:11px}
+.card{background:var(--charcoal);border:1px solid var(--border);border-radius:6px;padding:24px}
+.muted{color:var(--pearl);font-size:12px}
+.gold{color:var(--gold)}
+.danger{color:var(--danger)}
+.success{color:var(--success)}
+.flex{display:flex;align-items:center}
+.gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}.gap-24{gap:24px}
+.grid{display:grid;gap:16px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+
+/* ---------- Login ---------- */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 30% 20%,rgba(196,169,98,.06),transparent 50%),var(--obsidian)}
+.login-card{width:100%;max-width:380px;background:var(--charcoal);border:1px solid var(--border);border-radius:8px;padding:40px}
+.login-card h1{text-align:center;color:var(--gold);font-size:30px;margin-bottom:6px}
+.brand-tag{text-align:center;color:var(--gold-muted);font-size:9px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:32px}
+.form-row{margin-bottom:18px}
+
+/* ---------- App shell ---------- */
+.app{display:none;min-height:100vh;grid-template-columns:240px 1fr}
+.app.show{display:grid}
+.sidebar{background:var(--onyx);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{padding:0 24px 24px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.brand-name{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold)}
+.brand-sub{font-size:9px;color:var(--gold-muted);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
+.nav-group{flex:1;overflow-y:auto;padding:0 12px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:4px;margin-bottom:2px;font-size:13px;color:var(--cream);text-decoration:none;cursor:pointer;justify-content:space-between}
+.nav-item:hover{background:rgba(196,169,98,.05)}
+.nav-item.active{background:rgba(196,169,98,.1);color:var(--gold)}
+.nav-item .pill{font-size:10px;background:var(--rose);color:#fff;padding:2px 7px;border-radius:10px;font-weight:600}
+.nav-foot{padding:16px 24px;border-top:1px solid var(--border);font-size:11px;color:var(--pearl)}
+.main{padding:32px 40px;max-width:1400px;width:100%}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+.page-head .sub{color:var(--pearl);font-size:12px;margin-top:4px}
+
+/* ---------- Stats ---------- */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+.stat{background:var(--charcoal);border:1px solid var(--border);border-radius:6px;padding:20px}
+.stat .num{font-family:'Cormorant Garamond',serif;font-size:36px;color:var(--gold);line-height:1}
+.stat .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-muted);margin-top:8px}
+
+/* ---------- Tables ---------- */
+.tbl{width:100%;border-collapse:collapse;background:var(--charcoal);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.tbl th{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-muted);text-align:left;padding:14px 16px;border-bottom:1px solid var(--border);font-weight:600}
+.tbl td{padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover{background:rgba(196,169,98,.02)}
+.badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.badge-ok{background:rgba(107,158,122,.18);color:var(--success)}
+.badge-bad{background:rgba(196,84,84,.18);color:var(--danger)}
+.badge-pend{background:rgba(196,169,98,.15);color:var(--gold)}
+.warn-banner{background:rgba(196,84,84,.1);border:1px solid var(--danger);color:var(--cream);padding:12px 16px;border-radius:4px;font-size:12px;margin:12px 0}
+
+/* ---------- Modal ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:50;padding:24px}
+.modal-bg.show{display:flex}
+.modal{background:var(--charcoal);border:1px solid var(--border);border-radius:8px;padding:32px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto}
+.modal h2{margin-bottom:20px;color:var(--gold)}
+
+/* ---------- Toast ---------- */
+.toast-wrap{position:fixed;top:24px;right:24px;z-index:100;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--charcoal);border:1px solid var(--gold);color:var(--cream);padding:12px 18px;border-radius:4px;font-size:12px;animation:slide .3s}
+.toast.error{border-color:var(--danger)}
+.toast.success{border-color:var(--success)}
+@keyframes slide{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+
+/* ---------- Kanban ---------- */
+.kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.kcol{background:var(--onyx);border:1px solid var(--border);border-radius:6px;padding:12px;min-height:300px}
+.kcol h3{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-muted);margin-bottom:12px;font-family:'Inter',sans-serif;font-weight:600}
+.kcard{background:var(--charcoal);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px;font-size:12px;cursor:grab}
+.kcard:active{cursor:grabbing}
+.kcard.drag-over{border-color:var(--gold)}
+.kcard .when{color:var(--gold);font-weight:500}
+.kcard .who{color:var(--pearl);font-size:11px;margin-top:4px}
+.kcard .total{color:var(--cream);font-weight:500;margin-top:4px}
+
+/* ---------- Media tiles ---------- */
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.media-tile{background:var(--charcoal);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.media-tile .preview{aspect-ratio:1;background:var(--obsidian);display:flex;align-items:center;justify-content:center;color:var(--gold-muted);font-size:11px;letter-spacing:.1em}
+.media-tile .preview img{width:100%;height:100%;object-fit:cover}
+.media-tile.review .preview{filter:blur(20px);transition:filter .2s}
+.media-tile.review.unblurred .preview{filter:none}
+.media-tile .meta{padding:14px}
+
+/* ---------- Audit feed ---------- */
+.feed{display:flex;flex-direction:column;gap:1px;background:var(--border)}
+.feed-item{background:var(--charcoal);padding:12px 16px;font-size:12px;display:grid;grid-template-columns:90px 110px 1fr 140px;gap:12px;align-items:center}
+.feed-item .when{color:var(--pearl);font-size:11px;font-feature-settings:'tnum' 1}
+.feed-item .role{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold-muted)}
+.feed-item .act{color:var(--cream)}
+.feed-item .who{color:var(--pearl);font-size:11px;text-align:right}
+
+@media(max-width:1024px){
+  .app.show{grid-template-columns:1fr}
+  .sidebar{position:relative;height:auto}
+  .kanban{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================== LOGIN ============================== -->
+<div id="login" class="login-wrap">
+  <form class="login-card" id="loginForm" autocomplete="off">
+    <h1>Pink Rabbits</h1>
+    <div class="brand-tag">Operator Console — Amsterdam</div>
+    <div class="form-row">
+      <label class="label">Email</label>
+      <input type="email" id="email" required autocomplete="username">
+    </div>
+    <div class="form-row">
+      <label class="label">Password</label>
+      <input type="password" id="password" required autocomplete="current-password">
+    </div>
+    <button type="submit" class="btn" id="loginBtn" style="width:100%;justify-content:center">Sign in</button>
+    <div id="loginError" class="muted" style="margin-top:14px;color:var(--danger);font-size:12px;min-height:18px"></div>
+  </form>
+</div>
+
+<!-- ============================== APP SHELL ============================== -->
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-name">Pink Rabbits</div>
+      <div class="brand-sub">Operator Console</div>
+    </div>
+    <nav class="nav-group" id="nav"></nav>
+    <div class="nav-foot">
+      <div id="ownerEmail" style="color:var(--cream);margin-bottom:6px"></div>
+      <button class="btn-ghost btn btn-sm" id="signOut" style="width:100%;justify-content:center">Sign out</button>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<div id="modalBg" class="modal-bg"><div class="modal" id="modal"></div></div>
+<div id="toastWrap" class="toast-wrap"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// =====================================================================
+// CONFIG
+// =====================================================================
+const SUPABASE_URL = 'https://uzxwpsnyengqyqjgruub.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+const SESSION_TIMEOUT_MS = 4 * 60 * 60 * 1000;
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth:{persistSession:true,autoRefreshToken:true}
+});
+
+// =====================================================================
+// UTIL
+// =====================================================================
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+const fmtEur = n => new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(n||0);
+const fmtDate = s => s ? new Intl.DateTimeFormat('nl-NL',{dateStyle:'medium',timeStyle:'short'}).format(new Date(s)) : '—';
+const fmtRel = s => {
+  if(!s) return '—';
+  const diff=(Date.now()-new Date(s).getTime())/1000;
+  if(diff<60) return 'just now';
+  if(diff<3600) return Math.floor(diff/60)+'m ago';
+  if(diff<86400) return Math.floor(diff/3600)+'h ago';
+  return Math.floor(diff/86400)+'d ago';
+};
+const escapeHtml = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const maskPhone = s => s ? '••• •• '+String(s).slice(-3) : '—';
+const maskName  = s => { if(!s)return'—'; const p=String(s).trim().split(' '); return p[0]+(p[1]?' '+p[1][0]+'.':''); };
+
+function toast(msg,kind=''){
+  const el=document.createElement('div'); el.className='toast '+kind; el.textContent=msg;
+  $('#toastWrap').appendChild(el); setTimeout(()=>el.remove(),4000);
+}
+function showModal(html){ $('#modal').innerHTML=html; $('#modalBg').classList.add('show'); }
+function closeModal(){ $('#modalBg').classList.remove('show'); $('#modal').innerHTML=''; }
+$('#modalBg').addEventListener('click',e=>{ if(e.target.id==='modalBg') closeModal(); });
+
+// content-protection
+document.addEventListener('contextmenu',e=>{
+  if(['IMG','VIDEO'].includes(e.target.tagName)) e.preventDefault();
+});
+
+// =====================================================================
+// AUTH
+// =====================================================================
+let CURRENT_USER=null;
+let lastActivity=Date.now();
+['click','keydown','scroll','touchstart'].forEach(e=>
+  document.addEventListener(e,()=>lastActivity=Date.now(),{passive:true}));
+setInterval(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session) return;
+  if(Date.now()-lastActivity>SESSION_TIMEOUT_MS){
+    await sb.auth.signOut();
+    toast('Session expired. Please sign in again.','error');
+    showLogin();
+  }
+},60_000);
+
+async function logAttempt(email,success){
+  try{ await sb.from('auth_attempts').insert({email,success}); }catch(_){}
+}
+
+$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const email=$('#email').value.trim();
+  const password=$('#password').value;
+  const btn=$('#loginBtn'); btn.disabled=true; $('#loginError').textContent='';
+  try{
+    // Lockout check (best-effort; RLS allows insert/owner-read; an unauthed
+    // user can't read auth_attempts, so we rely on the server-side lock fn).
+    const {data:locked}=await sb.rpc('is_account_locked',{target_email:email});
+    if(locked){ throw new Error('Account temporarily locked. Try again later.'); }
+
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error){ await logAttempt(email,false); throw new Error('Invalid credentials'); }
+    await logAttempt(email,true);
+
+    const {data:profile}=await sb.from('profiles').select('role,companion_id').eq('id',data.user.id).maybeSingle();
+    if(!profile||profile.role!=='owner'){
+      await sb.auth.signOut();
+      throw new Error('Access denied');
+    }
+    await sb.from('profiles').update({last_login:new Date().toISOString()}).eq('id',data.user.id);
+    CURRENT_USER={id:data.user.id,email:data.user.email,role:'owner'};
+    showApp();
+  }catch(err){
+    $('#loginError').textContent=err.message||'Sign-in failed';
+  }finally{ btn.disabled=false; }
+});
+
+$('#signOut').addEventListener('click',async()=>{
+  await sb.auth.signOut();
+  CURRENT_USER=null;
+  showLogin();
+});
+
+function showLogin(){
+  $('#login').style.display='flex';
+  $('#app').classList.remove('show');
+  $('#email').value=''; $('#password').value='';
+}
+function showApp(){
+  $('#login').style.display='none';
+  $('#app').classList.add('show');
+  $('#ownerEmail').textContent=CURRENT_USER.email;
+  renderNav();
+  goto(location.hash.slice(1)||'dashboard');
+}
+
+// On boot: try to resume session
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){ showLogin(); return; }
+  const {data:profile}=await sb.from('profiles').select('role').eq('id',session.user.id).maybeSingle();
+  if(!profile||profile.role!=='owner'){ await sb.auth.signOut(); showLogin(); return; }
+  CURRENT_USER={id:session.user.id,email:session.user.email,role:'owner'};
+  showApp();
+})();
+
+// =====================================================================
+// ROUTER
+// =====================================================================
+const ROUTES=[
+  ['dashboard','Dashboard'],
+  ['companions','Companions'],
+  ['media','Media Approval'],
+  ['bookings','Bookings'],
+  ['store','Content Store'],
+  ['pricing','Pricing'],
+  ['members','Members'],
+  ['audit','Audit Log'],
+  ['deletion','Deletion Requests'],
+];
+function renderNav(){
+  $('#nav').innerHTML=ROUTES.map(([k,l])=>
+    `<a class="nav-item" data-route="${k}" href="#${k}"><span>${l}</span><span class="pill" id="nav-pill-${k}" style="display:none">0</span></a>`
+  ).join('');
+  $$('.nav-item').forEach(a=>a.addEventListener('click',e=>{
+    e.preventDefault(); goto(a.dataset.route);
+  }));
+  refreshPills();
+  setInterval(refreshPills,30_000);
+}
+async function refreshPills(){
+  try{
+    const [m,d]=await Promise.all([
+      sb.from('therapist_media').select('id',{count:'exact',head:true}).eq('approved',false).eq('visibility','pending_review'),
+      sb.from('deletion_requests').select('id',{count:'exact',head:true}).eq('status','pending'),
+    ]);
+    setPill('media',m.count||0); setPill('deletion',d.count||0);
+  }catch(_){}
+}
+function setPill(k,n){
+  const el=$('#nav-pill-'+k); if(!el) return;
+  if(n>0){ el.style.display='inline-block'; el.textContent=n; } else el.style.display='none';
+}
+function goto(route){
+  if(!ROUTES.find(r=>r[0]===route)) route='dashboard';
+  location.hash=route;
+  $$('.nav-item').forEach(a=>a.classList.toggle('active',a.dataset.route===route));
+  ({dashboard:renderDashboard, companions:renderCompanions, media:renderMedia,
+    bookings:renderBookings, store:renderStore, pricing:renderPricing,
+    members:renderMembers, audit:renderAudit, deletion:renderDeletion})[route]();
+}
+window.addEventListener('hashchange',()=>{ if(CURRENT_USER) goto(location.hash.slice(1)||'dashboard'); });
+
+// =====================================================================
+// EDGE FUNCTION CALLER
+// =====================================================================
+async function callFn(name,body,opts={}){
+  const {data:{session}}=await sb.auth.getSession();
+  const url=`${SUPABASE_URL}/functions/v1/${name}`;
+  const headers={'Authorization':`Bearer ${session.access_token}`};
+  let payload;
+  if(opts.form){ payload=body; }
+  else{ headers['Content-Type']='application/json'; payload=JSON.stringify(body); }
+  const r=await fetch(url,{method:'POST',headers,body:payload});
+  const json=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(json.error||`HTTP ${r.status}`);
+  return json;
+}
+
+// =====================================================================
+// SCREEN: DASHBOARD
+// =====================================================================
+async function renderDashboard(){
+  $('#main').innerHTML=`<div class="page-head"><div><h1>Dashboard</h1><div class="sub">Welcome back. Here's what's happening today.</div></div></div>
+    <div class="stats-grid" id="stats"></div>
+    <div class="card"><h2 style="margin-bottom:16px">Recent activity</h2><div id="feed" class="feed"></div></div>`;
+  const [active,pendBook,pendMedia,delReq] = await Promise.all([
+    sb.from('therapists').select('id',{count:'exact',head:true}).eq('is_active',true).eq('is_online',true),
+    sb.from('bookings').select('id',{count:'exact',head:true}).eq('status','pending'),
+    sb.from('therapist_media').select('id',{count:'exact',head:true}).eq('approved',false).eq('visibility','pending_review'),
+    sb.from('deletion_requests').select('id',{count:'exact',head:true}).eq('status','pending'),
+  ]);
+  $('#stats').innerHTML=[
+    ['Active companions',active.count||0],
+    ['Pending bookings',pendBook.count||0],
+    ['Pending media',pendMedia.count||0],
+    ['Deletion requests',delReq.count||0],
+  ].map(([l,n])=>`<div class="stat"><div class="num tnum">${n}</div><div class="lbl">${l}</div></div>`).join('');
+
+  const {data:audits}=await sb.from('audit_log').select('*').order('created_at',{ascending:false}).limit(20);
+  $('#feed').innerHTML=(audits||[]).map(a=>`
+    <div class="feed-item">
+      <div class="when">${escapeHtml(fmtRel(a.created_at))}</div>
+      <div class="role">${escapeHtml(a.role||'-')}</div>
+      <div class="act">${escapeHtml(a.action)} <span class="muted">${escapeHtml(a.target_table||'')}</span></div>
+      <div class="who">${escapeHtml((a.performed_by||'').slice(0,8))}</div>
+    </div>`).join('') || '<div class="feed-item"><div class="muted">No activity yet.</div></div>';
+}
+
+// =====================================================================
+// SCREEN: COMPANIONS
+// =====================================================================
+async function renderCompanions(){
+  $('#main').innerHTML=`<div class="page-head">
+    <div><h1>Companions</h1><div class="sub">Roster, age verification, and rate management.</div></div>
+    <button class="btn" id="addCompanion">Add companion</button></div>
+    <div id="comps"></div>`;
+  $('#addCompanion').addEventListener('click',()=>companionForm());
+  const {data}=await sb.from('therapists').select('*').order('display_name');
+  if(!data?.length){ $('#comps').innerHTML='<div class="card muted">No companions yet.</div>'; return; }
+  const rows=data.map(c=>{
+    const warn = !c.age_verified
+      ? `<div class="warn-banner" style="margin:8px 0 0">⚠ Age not verified — profile cannot be published.</div>` : '';
+    return `<tr>
+      <td>${escapeHtml(c.display_name)}${warn}</td>
+      <td>${c.age_verified?'<span class="badge badge-ok">Verified</span>':'<span class="badge badge-bad">Unverified</span>'}</td>
+      <td><span class="badge ${c.is_active?'badge-ok':'badge-pend'}">${c.is_active?'Published':'Draft'}</span></td>
+      <td><span class="badge ${c.is_online?'badge-ok':'badge-pend'}">${c.is_online?'Available':'Unavailable'}</span></td>
+      <td class="tnum">${fmtEur(c.hourly_rate)}/hr</td>
+      <td>${escapeHtml((c.specialties||[]).join(', '))}</td>
+      <td style="text-align:right">
+        <button class="btn btn-sm btn-ghost" data-edit="${c.id}">Edit</button>
+        <button class="btn btn-sm btn-ghost" data-verify="${c.id}" ${c.age_verified?'disabled':''}>Verify age</button>
+        <button class="btn btn-sm" data-pub="${c.id}" data-cur="${c.is_active}" ${!c.age_verified?'disabled':''}>${c.is_active?'Unpublish':'Publish'}</button>
+      </td></tr>`;
+  }).join('');
+  $('#comps').innerHTML=`<table class="tbl"><thead><tr>
+    <th>Name</th><th>Age</th><th>Status</th><th>Availability</th><th>Rate</th><th>Specialties</th><th></th>
+  </tr></thead><tbody>${rows}</tbody></table>`;
+  $$('[data-edit]').forEach(b=>b.onclick=()=>companionForm(data.find(c=>c.id===b.dataset.edit)));
+  $$('[data-verify]').forEach(b=>b.onclick=()=>verifyAge(b.dataset.verify));
+  $$('[data-pub]').forEach(b=>b.onclick=async()=>{
+    try{
+      await callFn('publish-companion',{companion_id:b.dataset.pub,publish:b.dataset.cur!=='true'});
+      toast('Updated','success'); renderCompanions();
+    }catch(e){ toast(e.message,'error'); }
+  });
+}
+
+function companionForm(c){
+  const isNew=!c;
+  showModal(`<h2>${isNew?'Add companion':'Edit '+escapeHtml(c.display_name)}</h2>
+    <div class="form-row"><label class="label">Display name</label><input id="f_name" value="${escapeHtml(c?.display_name||'')}"></div>
+    <div class="form-row"><label class="label">Bio</label><textarea id="f_bio" rows="3">${escapeHtml(c?.bio||'')}</textarea></div>
+    <div class="form-row"><label class="label">Specialties (comma separated)</label><input id="f_spec" value="${escapeHtml((c?.specialties||[]).join(', '))}"></div>
+    <div class="form-row"><label class="label">Hourly rate (€50–€2000)</label><input id="f_rate" type="number" min="50" max="2000" value="${c?.hourly_rate||200}"></div>
+    <div class="form-row"><label class="label">Date of birth</label><input id="f_dob" type="date" value="${c?.date_of_birth||''}"></div>
+    <div class="row" style="margin-top:24px">
+      <button class="btn-ghost btn" onclick="closeModal()">Cancel</button>
+      <button class="btn" id="saveC">Save</button>
+    </div>`);
+  $('#saveC').onclick=async()=>{
+    const payload={
+      display_name: $('#f_name').value.trim(),
+      bio: $('#f_bio').value.trim()||null,
+      specialties: $('#f_spec').value.split(',').map(s=>s.trim()).filter(Boolean),
+      hourly_rate: Number($('#f_rate').value),
+      date_of_birth: $('#f_dob').value||null,
+    };
+    try{
+      if(isNew){
+        const {error}=await sb.from('therapists').insert(payload); if(error) throw error;
+      } else {
+        // rate change goes through the validated edge fn
+        if(payload.hourly_rate!==c.hourly_rate){
+          await callFn('update-session-rate',{companion_id:c.id,hourly_rate:payload.hourly_rate});
+          delete payload.hourly_rate;
+        }
+        const {error}=await sb.from('therapists').update(payload).eq('id',c.id);
+        if(error) throw error;
+      }
+      toast('Saved','success'); closeModal(); renderCompanions();
+    }catch(e){ toast(e.message,'error'); }
+  };
+}
+
+async function verifyAge(id){
+  const {data:c}=await sb.from('therapists').select('*').eq('id',id).single();
+  if(!c.date_of_birth){ toast('Add date of birth first','error'); return; }
+  const age=Math.floor((Date.now()-new Date(c.date_of_birth).getTime())/(365.25*24*3600*1000));
+  if(age<18){ toast('Companion is under 18 — refusing','error'); return; }
+  if(!confirm(`Confirm: I have personally inspected a government-issued ID for ${c.display_name} and they are ${age} years old. This action is logged.`)) return;
+  try{
+    await sb.from('therapists').update({age_verified:true,age_verified_at:new Date().toISOString(),age_verified_by:CURRENT_USER.id}).eq('id',id);
+    await sb.from('audit_log').insert({performed_by:CURRENT_USER.id,role:'owner',action:'companion.age_verified',target_table:'therapists',target_id:id,new_value:{age}});
+    toast('Age verified','success'); renderCompanions();
+  }catch(e){ toast(e.message,'error'); }
+}
+
+// =====================================================================
+// SCREEN: MEDIA APPROVAL
+// =====================================================================
+async function renderMedia(){
+  $('#main').innerHTML=`<div class="page-head"><div><h1>Media approval queue</h1><div class="sub">Pending submissions awaiting review.</div></div></div>
+    <div id="mediaGrid" class="media-grid"></div>`;
+  const {data}=await sb.from('therapist_media')
+    .select('*, therapist:therapists(display_name)')
+    .eq('approved',false).eq('visibility','pending_review')
+    .order('submitted_at',{ascending:false});
+  if(!data?.length){ $('#mediaGrid').innerHTML='<div class="card muted">Queue is empty.</div>'; return; }
+  $('#mediaGrid').innerHTML=data.map(m=>`
+    <div class="media-tile review" data-id="${m.id}">
+      <div class="preview" data-sensitive>${m.media_type.toUpperCase()} preview</div>
+      <div class="meta">
+        <div class="serif" style="font-size:16px">${escapeHtml(m.therapist?.display_name||'—')}</div>
+        <div class="muted" style="margin:4px 0 10px">${escapeHtml(m.caption||'No caption')}</div>
+        <div style="font-size:11px;margin-bottom:6px">${m.consent_confirmed?'<span class="badge badge-ok">Consent ✓</span>':'<span class="badge badge-bad">No consent</span>'}</div>
+        <div class="muted" style="font-size:11px">Submitted ${escapeHtml(fmtRel(m.submitted_at))}</div>
+        <div class="row" style="margin-top:12px;gap:6px">
+          <button class="btn btn-sm btn-ghost" data-blur="${m.id}">Reveal</button>
+          <button class="btn btn-sm btn-ghost danger" data-rej="${m.id}">Reject</button>
+          <button class="btn btn-sm" data-app="${m.id}">Approve</button>
+        </div>
+      </div>
+    </div>`).join('');
+  $$('[data-blur]').forEach(b=>b.onclick=()=>$(`.media-tile[data-id="${b.dataset.blur}"]`).classList.toggle('unblurred'));
+  $$('[data-app]').forEach(b=>b.onclick=()=>approveMediaModal(b.dataset.app));
+  $$('[data-rej]').forEach(b=>b.onclick=()=>rejectMediaModal(b.dataset.rej));
+}
+function approveMediaModal(id){
+  showModal(`<h2>Approve media</h2>
+    <div class="form-row"><label class="label">Visibility</label>
+      <select id="vis"><option value="public">Public (free)</option><option value="for_sale">For sale</option></select></div>
+    <div class="form-row" id="priceRow" style="display:none"><label class="label">Price (€)</label><input id="price" type="number" min="1" value="15"></div>
+    <div class="row" style="margin-top:24px">
+      <button class="btn-ghost btn" onclick="closeModal()">Cancel</button>
+      <button class="btn" id="doApp">Approve</button></div>`);
+  $('#vis').onchange=()=>$('#priceRow').style.display=$('#vis').value==='for_sale'?'block':'none';
+  $('#doApp').onclick=async()=>{
+    try{
+      const vis=$('#vis').value;
+      await callFn('approve-media',{media_id:id,visibility:vis, price: vis==='for_sale'?Number($('#price').value):0});
+      toast('Approved','success'); closeModal(); renderMedia(); refreshPills();
+    }catch(e){ toast(e.message,'error'); }
+  };
+}
+function rejectMediaModal(id){
+  showModal(`<h2>Reject media</h2>
+    <div class="form-row"><label class="label">Reason (sent to companion)</label><textarea id="r" rows="3"></textarea></div>
+    <div class="row" style="margin-top:24px"><button class="btn-ghost btn" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-danger" id="doR">Reject & delete</button></div>`);
+  $('#doR').onclick=async()=>{
+    const reason=$('#r').value.trim(); if(!reason){ toast('Reason required','error'); return; }
+    try{ await callFn('reject-media',{media_id:id,reason}); toast('Rejected','success'); closeModal(); renderMedia(); refreshPills(); }
+    catch(e){ toast(e.message,'error'); }
+  };
+}
+
+// =====================================================================
+// SCREEN: BOOKINGS (KANBAN)
+// =====================================================================
+const BOOKING_STATES=['pending','confirmed','en_route','in_session','completed'];
+const STATE_LABELS={pending:'Pending',confirmed:'Confirmed',en_route:'En Route',in_session:'In Session',completed:'Completed'};
+async function renderBookings(){
+  $('#main').innerHTML=`<div class="page-head"><div><h1>Booking pipeline</h1><div class="sub">Drag a card to advance status. Transitions are validated server-side.</div></div></div>
+    <div class="kanban" id="kb"></div>`;
+  const {data}=await sb.from('bookings')
+    .select('*, transport_tiers(zone_label), booking_companions(therapist_id, therapists(display_name))')
+    .order('scheduled_at');
+  const cols=Object.fromEntries(BOOKING_STATES.map(s=>[s,[]]));
+  (data||[]).forEach(b=>{ if(cols[b.status]) cols[b.status].push(b); });
+  $('#kb').innerHTML=BOOKING_STATES.map(s=>`
+    <div class="kcol" data-state="${s}"><h3>${STATE_LABELS[s]} (${cols[s].length})</h3>
+      ${cols[s].map(b=>`<div class="kcard" draggable="true" data-id="${b.id}">
+        <div class="when tnum">${escapeHtml(fmtDate(b.scheduled_at))}</div>
+        <div class="who">${escapeHtml((b.booking_companions||[]).map(x=>x.therapists?.display_name).filter(Boolean).join(', ')||'—')} · ${escapeHtml(b.transport_tiers?.zone_label||'')}</div>
+        <div class="total tnum">${fmtEur(b.total_amount)}</div>
+      </div>`).join('')}
+    </div>`).join('');
+  $$('.kcard').forEach(c=>{
+    c.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',c.dataset.id));
+  });
+  $$('.kcol').forEach(col=>{
+    col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('drag-over');});
+    col.addEventListener('dragleave',()=>col.classList.remove('drag-over'));
+    col.addEventListener('drop',async e=>{
+      e.preventDefault(); col.classList.remove('drag-over');
+      const id=e.dataTransfer.getData('text/plain'); const target=col.dataset.state;
+      try{ await callFn('update-booking-status',{booking_id:id,status:target}); toast('Updated','success'); renderBookings(); }
+      catch(err){ toast(err.message,'error'); }
+    });
+  });
+}
+
+// =====================================================================
+// SCREEN: STORE (published media + access counts)
+// =====================================================================
+async function renderStore(){
+  $('#main').innerHTML=`<div class="page-head"><div><h1>Content store</h1><div class="sub">Approved media available to clients.</div></div></div>
+    <div id="storeGrid" class="media-grid"></div>`;
+  const {data}=await sb.from('therapist_media')
+    .select('*, therapist:therapists(display_name)')
+    .eq('approved',true).neq('visibility','archived').order('reviewed_at',{ascending:false});
+  if(!data?.length){ $('#storeGrid').innerHTML='<div class="card muted">No published media yet.</div>'; return; }
+  $('#storeGrid').innerHTML=data.map(m=>`
+    <div class="media-tile" data-id="${m.id}">
+      <div class="preview">${m.media_type.toUpperCase()}</div>
+      <div class="meta">
+        <div class="serif" style="font-size:16px">${escapeHtml(m.therapist?.display_name||'—')}</div>
+        <div class="muted" style="margin:4px 0 10px">${m.visibility==='for_sale'?'For sale · '+fmtEur(m.price):'Public · free'}</div>
+        <div class="row"><span class="muted" id="ac-${m.id}">…views</span>
+          <button class="btn btn-sm btn-ghost" data-arch="${m.id}">Archive</button></div>
+      </div>
+    </div>`).join('');
+  $$('[data-arch]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('Archive this media?')) return;
+    await sb.from('therapist_media').update({visibility:'archived'}).eq('id',b.dataset.arch);
+    toast('Archived','success'); renderStore();
+  });
+  // access counts
+  for(const m of data){
+    const {count}=await sb.from('media_access_log').select('id',{count:'exact',head:true}).eq('media_id',m.id);
+    const el=$(`#ac-${m.id}`); if(el) el.textContent=`${count||0} views`;
+  }
+}
+
+// =====================================================================
+// SCREEN: PRICING
+// =====================================================================
+async function renderPricing(){
+  $('#main').innerHTML=`<div class="page-head"><div><h1>Pricing & configuration</h1><div class="sub">Transport zones and accepted payment methods.</div></div></div>
+    <div class="card" style="margin-bottom:24px">
+      <div class="row" style="margin-bottom:14px"><h2>Transport zones</h2><button class="btn btn-sm" id="addZone">Add zone</button></div>
+      <div id="zones"></div>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:14px"><h2>Payment methods</h2><button class="btn btn-sm" id="addMethod">Add method</button></div>
+      <div id="methods"></div>
+    </div>`;
+  const [{data:zones},{data:methods}]=await Promise.all([
+    sb.from('transport_tiers').select('*').order('sort_order'),
+    sb.from('payment_methods').select('*').order('sort_order'),
+  ]);
+  $('#zones').innerHTML=`<table class="tbl"><thead><tr><th>Label</th><th>Name</th><th>Areas</th><th>Fare</th><th></th></tr></thead><tbody>
+    ${zones.map(z=>`<tr><td>${escapeHtml(z.zone_label)}</td><td>${escapeHtml(z.zone_name)}</td>
+      <td class="muted">${escapeHtml(z.areas||'')}</td><td class="tnum">${fmtEur(z.fare)}</td>
+      <td style="text-align:right"><button class="btn-ghost btn btn-sm" data-z="${z.id}">Edit</button>
+      <button class="btn-ghost btn btn-sm danger" data-zd="${z.id}">Delete</button></td></tr>`).join('')}
+  </tbody></table>`;
+  $('#methods').innerHTML=`<table class="tbl"><thead><tr><th>Name</th><th>Description</th><th>Active</th><th></th></tr></thead><tbody>
+    ${methods.map(m=>`<tr><td>${escapeHtml(m.name)}</td><td class="muted">${escapeHtml(m.description||'')}</td>
+      <td>${m.is_active?'<span class="badge badge-ok">Active</span>':'<span class="badge badge-bad">Off</span>'}</td>
+      <td style="text-align:right"><button class="btn-ghost btn btn-sm" data-m="${m.id}">Edit</button>
+      <button class="btn-ghost btn btn-sm" data-mt="${m.id}" data-act="${m.is_active}">${m.is_active?'Disable':'Enable'}</button></td></tr>`).join('')}
+  </tbody></table>`;
+  $('#addZone').onclick=()=>zoneForm();
+  $('#addMethod').onclick=()=>methodForm();
+  $$('[data-z]').forEach(b=>b.onclick=()=>zoneForm(zones.find(z=>z.id===b.dataset.z)));
+  $$('[data-zd]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('Delete this zone?'))return;
+    await sb.from('transport_tiers').delete().eq('id',b.dataset.zd); renderPricing();
+  });
+  $$('[data-m]').forEach(b=>b.onclick=()=>methodForm(methods.find(m=>m.id===b.dataset.m)));
+  $$('[data-mt]').forEach(b=>b.onclick=async()=>{
+    await sb.from('payment_methods').update({is_active:b.dataset.act!=='true'}).eq('id',b.dataset.mt); renderPricing();
+  });
+}
+function zoneForm(z){
+  showModal(`<h2>${z?'Edit':'Add'} zone</h2>
+    <div class="form-row"><label class="label">Label</label><input id="zl" value="${escapeHtml(z?.zone_label||'Zone')}"></div>
+    <div class="form-row"><label class="label">Name</label><input id="zn" value="${escapeHtml(z?.zone_name||'')}"></div>
+    <div class="form-row"><label class="label">Areas</label><input id="za" value="${escapeHtml(z?.areas||'')}"></div>
+    <div class="form-row"><label class="label">Fare (€)</label><input id="zf" type="number" min="0" value="${z?.fare||25}"></div>
+    <div class="form-row"><label class="label">Sort order</label><input id="zs" type="number" value="${z?.sort_order||0}"></div>
+    <div class="row" style="margin-top:24px"><button class="btn-ghost btn" onclick="closeModal()">Cancel</button>
+    <button class="btn" id="zsave">Save</button></div>`);
+  $('#zsave').onclick=async()=>{
+    const p={zone_label:$('#zl').value.trim(),zone_name:$('#zn').value.trim(),areas:$('#za').value.trim(),fare:Number($('#zf').value),sort_order:Number($('#zs').value)};
+    try{
+      if(z){ const {error}=await sb.from('transport_tiers').update(p).eq('id',z.id); if(error) throw error; }
+      else{ const {error}=await sb.from('transport_tiers').insert(p); if(error) throw error; }
+      toast('Saved','success'); closeModal(); renderPricing();
+    }catch(e){ toast(e.message,'error'); }
+  };
+}
+function methodForm(m){
+  showModal(`<h2>${m?'Edit':'Add'} payment method</h2>
+    <div class="form-row"><label class="label">Name</label><input id="mn" value="${escapeHtml(m?.name||'')}"></div>
+    <div class="form-row"><label class="label">Description</label><input id="md" value="${escapeHtml(m?.description||'')}"></div>
+    <div class="form-row"><label class="label">Sort order</label><input id="ms" type="number" value="${m?.sort_order||0}"></div>
+    <div class="row" style="margin-top:24px"><button class="btn-ghost btn" onclick="closeModal()">Cancel</button>
+    <button class="btn" id="msave">Save</button></div>`);
+  $('#msave').onclick=async()=>{
+    const p={name:$('#mn').value.trim(),description:$('#md').value.trim(),sort_order:Number($('#ms').value)};
+    try{
+      if(m){ await sb.from('payment_methods').update(p).eq('id',m.id); }
+      else{ await sb.from('payment_methods').insert({...p,is_active:true}); }
+      toast('Saved','success'); closeModal(); renderPricing();
+    }catch(e){ toast(e.message,'error'); }
+  };
+}
+
+// =====================================================================
+// SCREEN: MEMBERS
+// =====================================================================
+async function renderMembers(){
+  $('#main').innerHTML=`<div class="page-head"><div><h1>Members</h1><div class="sub">Client accounts. Phones masked by default.</div></div></div>
+    <div id="memTable"></div>`;
+  const {data}=await sb.from('profiles').select('*').eq('role','client').order('created_at',{ascending:false});
+  if(!data?.length){ $('#memTable').innerHTML='<div class="card muted">No members yet.</div>'; return; }
+  // booking aggregates
+  const ids=data.map(p=>p.id);
+  const {data:books}=await sb.from('bookings').select('client_id,total_amount,id').in('client_id',ids);
+  const stats={};
+  for(const b of books||[]){
+    const s=stats[b.client_id]||(stats[b.client_id]={count:0,total:0});
+    s.count++; s.total+=Number(b.total_amount||0);
+  }
+  $('#memTable').innerHTML=`<table class="tbl"><thead><tr>
+    <th>Member</th><th>Email</th><th>Phone</th><th>Bookings</th><th>Spend</th><th>Active</th><th></th>
+  </tr></thead><tbody>${data.map(p=>{
+    const s=stats[p.id]||{count:0,total:0};
+    return `<tr><td>${escapeHtml(maskName(p.display_name))}</td>
+      <td class="muted">${escapeHtml(p.email||'—')}</td>
+      <td class="tnum">${escapeHtml(maskPhone(p.phone))}</td>
+      <td class="tnum">${s.count}</td><td class="tnum">${fmtEur(s.total)}</td>
+      <td>${p.is_active?'<span class="badge badge-ok">Active</span>':'<span class="badge badge-bad">Off</span>'}</td>
+      <td style="text-align:right"><button class="btn-ghost btn btn-sm" data-tg="${p.id}" data-act="${p.is_active}">${p.is_active?'Deactivate':'Activate'}</button></td>
+    </tr>`}).join('')}</tbody></table>`;
+  $$('[data-tg]').forEach(b=>b.onclick=async()=>{
+    await sb.from('profiles').update({is_active:b.dataset.act!=='true'}).eq('id',b.dataset.tg); renderMembers();
+  });
+}
+
+// =====================================================================
+// SCREEN: AUDIT LOG
+// =====================================================================
+let auditPage=0;
+async function renderAudit(){
+  auditPage=0;
+  $('#main').innerHTML=`<div class="page-head"><div><h1>Audit log</h1><div class="sub">Append-only record of every state-changing action.</div></div>
+    <div class="flex gap-12">
+      <input id="filterAct" placeholder="filter action…" style="width:220px">
+      <button class="btn btn-ghost btn-sm" id="exportCsv">Export CSV</button>
+    </div></div>
+    <div id="auditFeed" class="feed"></div>
+    <div class="row" style="margin-top:16px"><button class="btn btn-ghost btn-sm" id="prev">‹ Newer</button>
+    <span class="muted tnum" id="pgN"></span><button class="btn btn-ghost btn-sm" id="next">Older ›</button></div>`;
+  $('#filterAct').oninput=()=>{ auditPage=0; loadAudit(); };
+  $('#prev').onclick=()=>{ if(auditPage>0){auditPage--;loadAudit();} };
+  $('#next').onclick=()=>{ auditPage++;loadAudit(); };
+  $('#exportCsv').onclick=exportAuditCsv;
+  loadAudit();
+}
+async function loadAudit(){
+  const PAGE=50;
+  let q=sb.from('audit_log').select('*',{count:'exact'}).order('created_at',{ascending:false}).range(auditPage*PAGE,auditPage*PAGE+PAGE-1);
+  const filter=$('#filterAct')?.value.trim();
+  if(filter) q=q.ilike('action',`%${filter}%`);
+  const {data,count}=await q;
+  $('#pgN').textContent=`${auditPage*PAGE+1}–${auditPage*PAGE+(data?.length||0)} of ${count||0}`;
+  $('#auditFeed').innerHTML=(data||[]).map(a=>`<div class="feed-item">
+    <div class="when">${escapeHtml(fmtDate(a.created_at))}</div>
+    <div class="role">${escapeHtml(a.role||'-')}</div>
+    <div class="act">${escapeHtml(a.action)} <span class="muted">${escapeHtml(a.target_table||'')}</span></div>
+    <div class="who">${escapeHtml((a.performed_by||'').slice(0,8))}</div></div>`).join('') || '<div class="feed-item muted">No entries.</div>';
+}
+async function exportAuditCsv(){
+  const {data}=await sb.from('audit_log').select('*').order('created_at',{ascending:false}).limit(5000);
+  const headers=['created_at','role','action','target_table','target_id','performed_by','ip_address'];
+  const rows=[headers.join(',')].concat((data||[]).map(r=>headers.map(h=>JSON.stringify(r[h]??'')).join(',')));
+  const blob=new Blob([rows.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`audit-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+}
+
+// =====================================================================
+// SCREEN: DELETION REQUESTS (GDPR)
+// =====================================================================
+async function renderDeletion(){
+  $('#main').innerHTML=`<div class="page-head"><div><h1>Deletion requests</h1><div class="sub">GDPR Art. 17 — right to erasure. Action irreversibly anonymises companion data.</div></div></div>
+    <div id="dr"></div>`;
+  const {data}=await sb.from('deletion_requests')
+    .select('*, therapist:therapists(display_name)')
+    .order('status').order('requested_at',{ascending:false});
+  if(!data?.length){ $('#dr').innerHTML='<div class="card muted">No requests.</div>'; return; }
+  $('#dr').innerHTML=`<table class="tbl"><thead><tr><th>Companion</th><th>Requested</th><th>Reason</th><th>Status</th><th></th></tr></thead><tbody>
+    ${data.map(d=>`<tr>
+      <td>${escapeHtml(d.therapist?.display_name||'—')}</td>
+      <td class="tnum">${escapeHtml(fmtDate(d.requested_at))}</td>
+      <td class="muted">${escapeHtml(d.reason||'—')}</td>
+      <td>${d.status==='pending'?'<span class="badge badge-pend">Pending</span>':'<span class="badge badge-ok">Actioned</span>'}</td>
+      <td style="text-align:right">${d.status==='pending'?`<button class="btn btn-sm btn-danger" data-act="${d.id}">Action erasure</button>`:''}</td>
+    </tr>`).join('')}</tbody></table>`;
+  $$('[data-act]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('Action this deletion request? This irreversibly anonymises the companion record and purges all media files. Audit log entries are retained as required by law.')) return;
+    try{
+      const r=await callFn('action-deletion-request',{request_id:b.dataset.act});
+      toast(`Done — anonymised as ${r.anonymised_as}`,'success'); renderDeletion(); refreshPills();
+    }catch(e){ toast(e.message,'error'); }
+  });
+}
+</script>
+</body>
+</html>

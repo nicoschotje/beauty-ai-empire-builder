@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pink Rabbits — Companion Portal</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; media-src blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --obsidian:#080808; --onyx:#0F0F0F; --charcoal:#161616;
+  --gold:#C4A962; --gold-light:#D4BE7E; --gold-muted:#8B7740;
+  --rose:#B87D7D; --cream:#E8E0D5; --pearl:#999999;
+  --success:#6B9E7A; --danger:#C45454;
+  --border:rgba(196,169,98,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--obsidian);color:var(--cream);font-family:'Inter',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;min-height:100vh}
+body{font-size:14px;line-height:1.5}
+img,video{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-weight:300;background:var(--obsidian);border:1px solid var(--border);color:var(--cream);padding:12px 14px;border-radius:4px;width:100%;font-size:14px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
+.label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-muted);margin-bottom:6px;display:block}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:300}
+h1{font-size:28px}
+h2{font-size:20px}
+.serif{font-family:'Cormorant Garamond',serif;font-weight:300}
+.tnum{font-feature-settings:'tnum' 1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border-radius:4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;background:var(--gold);color:var(--obsidian);width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--cream)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:8px 14px;font-size:11px;width:auto}
+.muted{color:var(--pearl);font-size:12px}
+.gold{color:var(--gold)}
+.success{color:var(--success)}
+.danger{color:var(--danger)}
+.card{background:var(--charcoal);border:1px solid var(--border);border-radius:6px;padding:20px;margin-bottom:14px}
+.warn-banner{background:rgba(196,84,84,.1);border:1px solid var(--danger);color:var(--cream);padding:12px 16px;border-radius:4px;font-size:12px;margin:12px 0}
+.success-banner{background:rgba(107,158,122,.1);border:1px solid var(--success);color:var(--cream);padding:12px 16px;border-radius:4px;font-size:12px;margin:12px 0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+/* mobile-first phone frame */
+.frame{max-width:430px;margin:0 auto;min-height:100vh;background:var(--obsidian);position:relative;padding-bottom:80px}
+.app-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--onyx);position:sticky;top:0;z-index:10}
+.app-header .brand{font-family:'Cormorant Garamond',serif;color:var(--gold);font-size:22px}
+.app-header .who{font-size:11px;color:var(--pearl)}
+.screen{padding:20px}
+.tabbar{position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);background:var(--onyx);border-top:1px solid var(--border)}
+.tab{padding:12px 6px;text-align:center;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--pearl);cursor:pointer}
+.tab.active{color:var(--gold)}
+.tab .ic{display:block;font-family:'Cormorant Garamond',serif;font-size:18px;line-height:1;margin-bottom:4px}
+
+/* ---------- Login ---------- */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 20%,rgba(196,169,98,.06),transparent 50%),var(--obsidian)}
+.login-card{width:100%;max-width:380px;background:var(--charcoal);border:1px solid var(--border);border-radius:8px;padding:36px}
+.login-card h1{text-align:center;color:var(--gold);font-size:30px;margin-bottom:6px}
+.brand-tag{text-align:center;color:var(--gold-muted);font-size:9px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:32px}
+.form-row{margin-bottom:18px}
+
+/* ---------- Toast ---------- */
+.toast-wrap{position:fixed;top:14px;left:14px;right:14px;z-index:100;display:flex;flex-direction:column;gap:8px;max-width:430px;margin:0 auto}
+.toast{background:var(--charcoal);border:1px solid var(--gold);color:var(--cream);padding:12px 16px;border-radius:4px;font-size:12px;animation:slide .3s}
+.toast.error{border-color:var(--danger)}
+.toast.success{border-color:var(--success)}
+@keyframes slide{from{transform:translateY(-30px);opacity:0}to{transform:none;opacity:1}}
+
+.big-toggle{display:flex;align-items:center;justify-content:space-between;background:var(--charcoal);border:1px solid var(--border);border-radius:8px;padding:18px}
+.switch{position:relative;width:54px;height:28px;background:#222;border-radius:99px;border:1px solid var(--border);cursor:pointer}
+.switch::after{content:"";position:absolute;left:3px;top:2px;width:22px;height:22px;border-radius:50%;background:var(--pearl);transition:.2s}
+.switch.on{background:rgba(107,158,122,.4);border-color:var(--success)}
+.switch.on::after{left:28px;background:var(--success)}
+.kv{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.kv:last-child{border:none}
+.kv .k{color:var(--pearl)}
+.kv .v{color:var(--cream);font-weight:500}
+.consent-box{background:var(--obsidian);border:1px solid var(--gold);border-radius:6px;padding:14px;margin:14px 0;font-size:12px;line-height:1.6}
+.consent-box label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.consent-box input[type=checkbox]{width:auto;margin-top:3px}
+.terms-body{background:var(--obsidian);border:1px solid var(--border);border-radius:4px;padding:18px;font-size:12px;line-height:1.7;max-height:50vh;overflow-y:auto;margin:14px 0}
+.terms-body h3{color:var(--gold);margin-top:14px;margin-bottom:6px;font-size:14px;font-family:'Inter',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+</style>
+</head>
+<body>
+
+<!-- ============================== LOGIN ============================== -->
+<div id="login" class="login-wrap">
+  <form class="login-card" id="loginForm" autocomplete="off">
+    <h1>Pink Rabbits</h1>
+    <div class="brand-tag">Companion Portal</div>
+    <div class="form-row"><label class="label">Email</label><input type="email" id="email" required autocomplete="username"></div>
+    <div class="form-row"><label class="label">Password</label><input type="password" id="password" required autocomplete="current-password"></div>
+    <button type="submit" class="btn" id="loginBtn">Sign in</button>
+    <div id="loginError" class="muted" style="margin-top:14px;color:var(--danger);font-size:12px;min-height:18px"></div>
+  </form>
+</div>
+
+<!-- ============================== APP ============================== -->
+<div class="frame" id="app" style="display:none">
+  <header class="app-header">
+    <div class="brand">Pink Rabbits</div>
+    <div class="who" id="whoami">—</div>
+  </header>
+  <main id="screen" class="screen"></main>
+  <nav class="tabbar" id="tabs">
+    <div class="tab" data-tab="profile"><span class="ic">P</span>Profile</div>
+    <div class="tab" data-tab="schedule"><span class="ic">S</span>Schedule</div>
+    <div class="tab" data-tab="submit"><span class="ic">M</span>Submit</div>
+    <div class="tab" data-tab="account"><span class="ic">A</span>Account</div>
+  </nav>
+</div>
+
+<div id="toastWrap" class="toast-wrap"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL='https://uzxwpsnyengqyqjgruub.supabase.co';
+const SUPABASE_ANON_KEY='YOUR_ANON_KEY';
+const SESSION_TIMEOUT_MS=8*60*60*1000;
+const TERMS_VERSION='v1.0-2025';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtEur=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(n||0);
+const fmtDate=s=>s?new Intl.DateTimeFormat('nl-NL',{dateStyle:'medium',timeStyle:'short'}).format(new Date(s)):'—';
+
+function toast(msg,kind=''){
+  const el=document.createElement('div'); el.className='toast '+kind; el.textContent=msg;
+  $('#toastWrap').appendChild(el); setTimeout(()=>el.remove(),4000);
+}
+document.addEventListener('contextmenu',e=>{ if(['IMG','VIDEO'].includes(e.target.tagName)) e.preventDefault(); });
+
+let CURRENT=null, COMPANION=null;
+let lastActivity=Date.now();
+['click','keydown','scroll','touchstart'].forEach(e=>document.addEventListener(e,()=>lastActivity=Date.now(),{passive:true}));
+setInterval(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session) return;
+  if(Date.now()-lastActivity>SESSION_TIMEOUT_MS){
+    await sb.auth.signOut(); toast('Session expired','error'); showLogin();
+  }
+},60_000);
+
+async function logAttempt(email,success){
+  try{ await sb.from('auth_attempts').insert({email,success}); }catch(_){}
+}
+
+$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const email=$('#email').value.trim(); const password=$('#password').value;
+  $('#loginBtn').disabled=true; $('#loginError').textContent='';
+  try{
+    const {data:locked}=await sb.rpc('is_account_locked',{target_email:email});
+    if(locked) throw new Error('Account temporarily locked. Try again later.');
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error){ await logAttempt(email,false); throw new Error('Invalid credentials'); }
+    await logAttempt(email,true);
+    const {data:profile}=await sb.from('profiles').select('role,companion_id,terms_accepted,terms_version,display_name').eq('id',data.user.id).maybeSingle();
+    if(!profile||profile.role!=='companion'){ await sb.auth.signOut(); throw new Error('Access denied'); }
+    if(!profile.companion_id){ await sb.auth.signOut(); throw new Error('Account not linked. Contact operator.'); }
+    await sb.from('profiles').update({last_login:new Date().toISOString()}).eq('id',data.user.id);
+    CURRENT={id:data.user.id,email:data.user.email,...profile};
+    bootApp();
+  }catch(err){ $('#loginError').textContent=err.message||'Sign-in failed'; }
+  finally{ $('#loginBtn').disabled=false; }
+});
+
+function showLogin(){
+  $('#login').style.display='flex'; $('#app').style.display='none';
+  $('#email').value=''; $('#password').value='';
+}
+async function bootApp(){
+  $('#login').style.display='none'; $('#app').style.display='block';
+  const {data:c}=await sb.from('therapists').select('*').eq('id',CURRENT.companion_id).maybeSingle();
+  COMPANION=c;
+  $('#whoami').textContent=COMPANION?.display_name||CURRENT.email;
+  if(!CURRENT.terms_accepted || CURRENT.terms_version!==TERMS_VERSION){
+    renderTerms(); return;
+  }
+  goto('profile');
+}
+
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){ showLogin(); return; }
+  const {data:profile}=await sb.from('profiles').select('role,companion_id,terms_accepted,terms_version').eq('id',session.user.id).maybeSingle();
+  if(!profile||profile.role!=='companion'){ await sb.auth.signOut(); showLogin(); return; }
+  CURRENT={id:session.user.id,email:session.user.email,...profile};
+  if(!profile.companion_id){ await sb.auth.signOut(); showLogin(); return; }
+  bootApp();
+})();
+
+// =====================================================================
+// EDGE FUNCTION CALLER
+// =====================================================================
+async function callFn(name,body,opts={}){
+  const {data:{session}}=await sb.auth.getSession();
+  const url=`${SUPABASE_URL}/functions/v1/${name}`;
+  const headers={'Authorization':`Bearer ${session.access_token}`};
+  let payload;
+  if(opts.form){ payload=body; }
+  else{ headers['Content-Type']='application/json'; payload=JSON.stringify(body); }
+  const r=await fetch(url,{method:'POST',headers,body:payload});
+  const json=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(json.error||`HTTP ${r.status}`);
+  return json;
+}
+
+// =====================================================================
+// ROUTER
+// =====================================================================
+const SCREENS=['profile','schedule','submit','account'];
+function goto(s){
+  if(!SCREENS.includes(s)) s='profile';
+  $('#tabs').style.display='grid';
+  $$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===s));
+  ({profile:renderProfile,schedule:renderSchedule,submit:renderSubmit,account:renderAccount})[s]();
+}
+$$('.tab').forEach(t=>t.addEventListener('click',()=>goto(t.dataset.tab)));
+
+// =====================================================================
+// SCREEN: TERMS
+// =====================================================================
+function renderTerms(){
+  $('#tabs').style.display='none';
+  $('#screen').innerHTML=`<h1>Welcome${COMPANION?', '+escapeHtml(COMPANION.display_name):''}</h1>
+    <div class="muted" style="margin-bottom:14px">Please review and accept the companion terms before continuing. You will not be able to access the portal until you accept.</div>
+    <div class="terms-body">
+      <h3>1. Independence</h3>
+      You operate as an independent contractor. You set your own availability and may decline any booking for any reason without justification.
+      <h3>2. Age and identity</h3>
+      You confirm that you are 18 years of age or older and that the operator has verified your identity using government-issued ID.
+      <h3>3. Consent over content</h3>
+      Any photo or video you submit through this portal is published only with your explicit per-submission consent. Removal can be requested at any time.
+      <h3>4. Right to erasure (GDPR Art. 17)</h3>
+      You may request total deletion of your data at any time from the Account screen. The operator must action the request and irreversibly anonymise your record.
+      <h3>5. Payments</h3>
+      Earnings are settled by the operator according to the terms agreed offline. Payment proofs are visible only to the operator, never to companions.
+      <h3>6. Safety</h3>
+      Client identities are masked from your schedule view. Booking details disclose only the time, duration and zone.
+      <h3>7. Audit</h3>
+      All actions you take in this portal are logged for security and compliance purposes. The audit log is append-only.
+    </div>
+    <div class="consent-box"><label>
+      <input type="checkbox" id="acc">
+      <span>I have read the companion terms (version ${TERMS_VERSION}) and I accept them. I confirm I am 18 years of age or older.</span>
+    </label></div>
+    <button class="btn" id="acceptBtn" disabled>Accept & continue</button>
+    <button class="btn btn-ghost" style="margin-top:12px" id="signOutT">Sign out</button>`;
+  $('#acc').onchange=()=>$('#acceptBtn').disabled=!$('#acc').checked;
+  $('#acceptBtn').onclick=async()=>{
+    try{
+      await sb.from('profiles').update({
+        terms_accepted:true, terms_accepted_at:new Date().toISOString(), terms_version:TERMS_VERSION
+      }).eq('id',CURRENT.id);
+      await sb.from('audit_log').insert({performed_by:CURRENT.id,role:'companion',action:'terms.accepted',target_table:'profiles',target_id:CURRENT.id,new_value:{version:TERMS_VERSION}});
+      CURRENT.terms_accepted=true; CURRENT.terms_version=TERMS_VERSION;
+      toast('Welcome aboard','success'); goto('profile');
+    }catch(e){ toast(e.message,'error'); }
+  };
+  $('#signOutT').onclick=async()=>{ await sb.auth.signOut(); CURRENT=null; showLogin(); };
+}
+
+// =====================================================================
+// SCREEN: PROFILE
+// =====================================================================
+async function renderProfile(){
+  const {data:c}=await sb.from('therapists').select('*').eq('id',CURRENT.companion_id).single();
+  COMPANION=c;
+  const ageWarn = !c.age_verified
+    ? `<div class="warn-banner">⚠ Your identity has not yet been age-verified by the operator. You cannot mark yourself as available until this is complete.</div>`:'';
+  $('#screen').innerHTML=`<h1>${escapeHtml(c.display_name)}</h1>
+    ${ageWarn}
+    <div class="big-toggle" style="margin:14px 0">
+      <div><div class="serif" style="font-size:18px">Availability</div><div class="muted" style="margin-top:2px">${c.is_online?'You are visible to clients':'You are hidden'}</div></div>
+      <div class="switch ${c.is_online?'on':''}" id="onlineSwitch" ${!c.age_verified?'style="opacity:.4;pointer-events:none"':''}></div>
+    </div>
+    <div class="card">
+      <div class="kv"><span class="k">Hourly rate</span><span class="v tnum">${fmtEur(c.hourly_rate)}</span></div>
+      <div class="kv"><span class="k">Rating</span><span class="v">${c.rating?c.rating.toFixed(1)+' ★':'—'}</span></div>
+      <div class="kv"><span class="k">Reviews</span><span class="v tnum">${c.review_count||0}</span></div>
+      <div class="kv"><span class="k">Profile</span><span class="v">${c.is_active?'Published':'Draft'}</span></div>
+    </div>
+    <div class="card">
+      <h2 style="margin-bottom:10px">About me</h2>
+      <textarea id="bio" rows="5" placeholder="Tell clients about yourself…">${escapeHtml(c.bio||'')}</textarea>
+      <button class="btn btn-sm" style="margin-top:10px;width:auto" id="saveBio">Save bio</button>
+    </div>
+    <div class="card">
+      <h2 style="margin-bottom:10px">Specialties</h2>
+      <input id="spec" placeholder="comma separated" value="${escapeHtml((c.specialties||[]).join(', '))}">
+      <button class="btn btn-sm" style="margin-top:10px;width:auto" id="saveSpec">Save specialties</button>
+    </div>
+    <div class="muted" style="margin-top:8px">Your hourly rate is set by the operator. Contact them to discuss changes.</div>`;
+  $('#onlineSwitch').onclick=async()=>{
+    if(!c.age_verified) return;
+    try{
+      await callFn('companion-update-self',{is_online:!c.is_online});
+      toast('Updated','success'); renderProfile();
+    }catch(e){ toast(e.message,'error'); }
+  };
+  $('#saveBio').onclick=async()=>{
+    try{ await callFn('companion-update-self',{bio:$('#bio').value.trim()}); toast('Bio saved','success'); }
+    catch(e){ toast(e.message,'error'); }
+  };
+  $('#saveSpec').onclick=async()=>{
+    const arr=$('#spec').value.split(',').map(s=>s.trim()).filter(Boolean);
+    try{ await callFn('companion-update-self',{specialties:arr}); toast('Specialties saved','success'); }
+    catch(e){ toast(e.message,'error'); }
+  };
+}
+
+// =====================================================================
+// SCREEN: SCHEDULE
+// =====================================================================
+async function renderSchedule(){
+  // Bookings: companion can read these via RLS, but we show only safe fields.
+  const {data:bcs}=await sb.from('booking_companions')
+    .select('booking_id, bookings(id, scheduled_at, duration_min, status, transport_tiers(zone_label))')
+    .eq('therapist_id',CURRENT.companion_id);
+  const upcoming=(bcs||[]).map(x=>x.bookings).filter(b=>b && new Date(b.scheduled_at)>=new Date(Date.now()-3*3600*1000) && ['pending','confirmed','en_route','in_session'].includes(b.status))
+    .sort((a,b)=>new Date(a.scheduled_at)-new Date(b.scheduled_at));
+  $('#screen').innerHTML=`<h1>My schedule</h1>
+    <div class="muted" style="margin-bottom:14px">Upcoming confirmed sessions. Client identities are intentionally hidden.</div>
+    ${upcoming.length?upcoming.map(b=>`<div class="card">
+      <div class="row"><div class="serif" style="font-size:18px">${escapeHtml(fmtDate(b.scheduled_at))}</div>
+        <span class="muted">${escapeHtml(b.transport_tiers?.zone_label||'—')}</span></div>
+      <div class="kv" style="margin-top:8px"><span class="k">Duration</span><span class="v tnum">${b.duration_min} min</span></div>
+      <div class="kv"><span class="k">Status</span><span class="v gold">${b.status.replace('_',' ')}</span></div>
+    </div>`).join(''):'<div class="card muted">No upcoming sessions.</div>'}`;
+}
+
+// =====================================================================
+// SCREEN: SUBMIT CONTENT
+// =====================================================================
+async function renderSubmit(){
+  const {data:prev}=await sb.from('therapist_media').select('*').eq('therapist_id',CURRENT.companion_id).order('submitted_at',{ascending:false}).limit(20);
+  $('#screen').innerHTML=`<h1>Submit content</h1>
+    <div class="muted" style="margin-bottom:14px">Photos and short videos. Reviewed by the operator before going live.</div>
+    <div class="card">
+      <div class="form-row"><label class="label">Caption (optional)</label><input id="cap"></div>
+      <div class="form-row"><label class="label">File (JPEG, PNG, WEBP, MP4 — max 20 MB image / 500 MB video)</label><input id="file" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"></div>
+      <div class="consent-box"><label>
+        <input type="checkbox" id="consent">
+        <span>I confirm this content features myself and I consent to it being published or sold on this platform. I am 18 years of age or older.</span>
+      </label></div>
+      <button class="btn" id="submitMedia" disabled>Submit for review</button>
+    </div>
+    <h2 style="margin:24px 0 10px">Recent submissions</h2>
+    ${(prev||[]).length?(prev||[]).map(m=>{
+      const status = m.approved ? `<span class="success">Approved · ${m.visibility==='for_sale'?'For sale '+fmtEur(m.price):'Public'}</span>`
+                   : m.rejection_reason ? `<span class="danger">Rejected · ${escapeHtml(m.rejection_reason)}</span>`
+                   : `<span class="gold">Pending review</span>`;
+      return `<div class="card"><div class="row"><div>
+        <div class="serif">${escapeHtml(m.caption||'(no caption)')}</div>
+        <div class="muted" style="margin-top:4px">${escapeHtml(fmtDate(m.submitted_at))} · ${escapeHtml(m.media_type)}</div>
+      </div><div style="font-size:11px">${status}</div></div></div>`;
+    }).join(''):'<div class="card muted">No submissions yet.</div>'}`;
+
+  $('#consent').onchange=()=>$('#submitMedia').disabled=!$('#consent').checked || !$('#file').files[0];
+  $('#file').onchange=()=>$('#submitMedia').disabled=!$('#consent').checked || !$('#file').files[0];
+
+  $('#submitMedia').onclick=async()=>{
+    const file=$('#file').files[0]; const caption=$('#cap').value.trim();
+    if(!file || !$('#consent').checked) return;
+    const isVideo=file.type.startsWith('video/');
+    const isImage=file.type.startsWith('image/');
+    if(!isVideo && !isImage){ toast('Unsupported file type','error'); return; }
+    if(isImage && file.size>20*1024*1024){ toast('Image too large (max 20 MB)','error'); return; }
+    if(isVideo && file.size>500*1024*1024){ toast('Video too large (max 500 MB)','error'); return; }
+    const ext=file.name.split('.').pop()||'bin';
+    const path=`${CURRENT.companion_id}/${crypto.randomUUID()}.${ext}`;
+    try{
+      $('#submitMedia').disabled=true;
+      const {error:upErr}=await sb.storage.from('media-pending-review').upload(path,file,{contentType:file.type,upsert:false});
+      if(upErr) throw upErr;
+      const {error:insErr}=await sb.from('therapist_media').insert({
+        therapist_id:CURRENT.companion_id,
+        storage_path:`media-pending-review/${path}`,
+        media_type:isVideo?'video':'image',
+        visibility:'pending_review',
+        approved:false,
+        consent_confirmed:true,
+        consent_confirmed_at:new Date().toISOString(),
+        caption:caption||null,
+      });
+      if(insErr) throw insErr;
+      await sb.from('audit_log').insert({performed_by:CURRENT.id,role:'companion',action:'media.submitted',target_table:'therapist_media',target_id:null,new_value:{media_type:isVideo?'video':'image'}});
+      toast('Submitted for review','success');
+      renderSubmit();
+    }catch(e){ toast(e.message,'error'); $('#submitMedia').disabled=false; }
+  };
+}
+
+// =====================================================================
+// SCREEN: ACCOUNT
+// =====================================================================
+async function renderAccount(){
+  // Earnings: count completed bookings the companion participated in
+  const {data:bcs}=await sb.from('booking_companions')
+    .select('booking_id, bookings(status, scheduled_at, total_amount)')
+    .eq('therapist_id',CURRENT.companion_id);
+  const completed=(bcs||[]).filter(x=>x.bookings?.status==='completed');
+  const total=completed.reduce((s,x)=>s+Number(x.bookings.total_amount||0),0);
+  const monthAgo=Date.now()-30*86400*1000;
+  const month=completed.filter(x=>new Date(x.bookings.scheduled_at).getTime()>=monthAgo)
+    .reduce((s,x)=>s+Number(x.bookings.total_amount||0),0);
+  const {data:dr}=await sb.from('deletion_requests').select('id,status,requested_at').eq('companion_id',CURRENT.companion_id).order('requested_at',{ascending:false}).limit(1);
+  const open=dr?.[0]?.status==='pending';
+  $('#screen').innerHTML=`<h1>Account</h1>
+    <div class="card"><div class="kv"><span class="k">Email</span><span class="v">${escapeHtml(CURRENT.email)}</span></div>
+      <div class="kv"><span class="k">Terms version</span><span class="v">${escapeHtml(CURRENT.terms_version||'—')}</span></div></div>
+    <div class="card">
+      <h2 style="margin-bottom:8px">Earnings</h2>
+      <div class="kv"><span class="k">This month (gross)</span><span class="v tnum">${fmtEur(month)}</span></div>
+      <div class="kv"><span class="k">All time (gross)</span><span class="v tnum">${fmtEur(total)}</span></div>
+      <div class="kv"><span class="k">Completed sessions</span><span class="v tnum">${completed.length}</span></div>
+      <div class="muted" style="font-size:11px;margin-top:8px">Settlement is handled offline by the operator. Payment proofs are not visible from this portal.</div>
+    </div>
+    <div class="card">
+      <h2 style="margin-bottom:8px">Right to erasure</h2>
+      <div class="muted" style="margin-bottom:12px">Under GDPR Article 17 you may request total deletion of your data. The operator will action your request and irreversibly anonymise your record. Audit log entries are retained as required by Dutch law, but your name will be redacted.</div>
+      ${open?'<div class="success-banner">A deletion request is already pending. The operator has been notified.</div>':`<button class="btn btn-danger" id="reqDel">Request data deletion</button>`}
+    </div>
+    <button class="btn btn-ghost" style="margin-top:8px" id="signOut">Sign out</button>`;
+  $('#signOut').onclick=async()=>{ await sb.auth.signOut(); CURRENT=null; COMPANION=null; showLogin(); };
+  if(!open){
+    $('#reqDel').onclick=async()=>{
+      const reason=prompt('Optional: reason for your request (kept on file for the operator)') || null;
+      if(!confirm('Submit a data deletion request? You can revoke it by contacting the operator before they action it.')) return;
+      try{
+        const {error}=await sb.from('deletion_requests').insert({
+          companion_id:CURRENT.companion_id,
+          requested_by:CURRENT.id,
+          reason
+        });
+        if(error) throw error;
+        await sb.from('audit_log').insert({performed_by:CURRENT.id,role:'companion',action:'gdpr.erasure_requested',target_table:'deletion_requests',target_id:null});
+        toast('Request submitted','success'); renderAccount();
+      }catch(e){ toast(e.message,'error'); }
+    };
+  }
+}
+</script>
+</body>
+</html>
