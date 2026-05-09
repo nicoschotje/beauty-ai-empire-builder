@@ -2,7 +2,7 @@
 
 import { getSB } from '../core/supabase.js';
 import { AppState } from '../core/state.js';
-import { toast, toastError } from '../core/toast.js';
+import { toast, toastError, toastWarn } from '../core/toast.js';
 import {
   formatCurrency, formatRelative, formatDate, shortId, escapeHTML,
   STATUS_FLOW, STATUS_LABELS, nextStatus, el,
@@ -129,15 +129,78 @@ function render() {
   listEl.innerHTML = AppState.orders.map(orderCardHTML).join('');
 }
 
+/* ---------- Telegram notify (§5.2, §10.1, §10.9) ---------- */
+
+// §10.9 message templates per status. Returns null for statuses without a
+// customer-facing template (e.g. 'preparing' is internal kitchen state).
+function buildStatusMessage(order, newStatus) {
+  const name    = order.customer_name || 'there';
+  const sid     = shortId(order.id);
+  const total   = formatCurrency(order.total);
+  const payment = order.payment_method || 'COD';
+  const store   = AppState.settings?.store_name || "Mr. Beanie's Greenies";
+
+  if (newStatus === 'confirmed') {
+    return `Hi ${name}! Your order #${sid} has been confirmed.\n` +
+           `Total: ${total} via ${payment}.\n` +
+           `We'll notify you when it's being prepared. Thank you! 🌿`;
+  }
+  if (newStatus === 'out_for_delivery') {
+    return `Hi ${name}! Your order #${sid} is now out for delivery!\n` +
+           `Rider is on the way. Please be ready. 🛵`;
+  }
+  if (newStatus === 'completed') {
+    return `Hi ${name}! Your order #${sid} has been delivered.\n` +
+           `Thank you for choosing ${store}! 🌱`;
+  }
+  if (newStatus === 'cancelled') {
+    return `Hi ${name}, your order #${sid} has been cancelled.\n` +
+           `If this was unexpected, please contact us. Sorry for the inconvenience.`;
+  }
+  return null;
+}
+
+// Fire-and-forget Telegram notify. Failure is non-blocking — surfaces as a
+// warning toast but never blocks or reverts the status advance.
+async function notifyCustomer(order, newStatus) {
+  if (!order?.telegram_chat_id) return;            // §10.1: gate on chat ID
+  const message = buildStatusMessage(order, newStatus);
+  if (!message) return;                            // no template → skip
+
+  const sb = getSB();
+  const { error } = await sb.functions.invoke('notify-customer', {
+    body: {
+      telegram_chat_id: order.telegram_chat_id,
+      order_id: order.id,
+      status: newStatus,
+      customer_name: order.customer_name || '',
+      message,
+    },
+  });
+  if (error) throw error;
+}
+
 /* ---------- Mutations (blueprint §11.2) ---------- */
 
 async function quickSetStatus(orderId, newStatus) {
   const sb = getSB();
+  // Capture local copy before reload — needed for telegram_chat_id + name
+  const order = AppState.orders.find(o => o.id === orderId);
+
   const { error } = await sb.from('orders')
     .update({ order_status: newStatus, updated_at: new Date().toISOString() })
     .eq('id', orderId);
   if (error) { toastError(error.message); return false; }
   toast(`Order ${shortId(orderId)} → ${STATUS_LABELS[newStatus] || newStatus}`);
+
+  // §10.1: after status update, call notify-customer if chat ID present.
+  // Run asynchronously so a failed/slow edge function never blocks the UI.
+  if (order?.telegram_chat_id) {
+    notifyCustomer(order, newStatus).catch(err => {
+      toastWarn(`Telegram notify failed: ${err?.message || err}`);
+    });
+  }
+
   await loadOrders();
   render();
   return true;
