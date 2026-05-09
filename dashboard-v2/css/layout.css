@@ -231,6 +231,18 @@ input, select, textarea {
 .module-pane { display: none; }
 .module-pane.active { display: block; }
 
+/* Surface containers (only one visible at a time) */
+.surface { display: none; }
+.surface.active { display: block; }
+
+/* Per-surface nav groups (only the active surface's modules show in sidebar) */
+.nav-group { display: none; }
+.nav-group.active { display: block; }
+
+/* Surface tab visual states */
+.nav-item[data-surface] { font-weight: 600; }
+.nav-item.disabled-soon { opacity: 0.4; pointer-events: none; }
+
 /* Login overlay */
 .login-overlay {
   position: fixed;

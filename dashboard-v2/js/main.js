@@ -42,9 +42,59 @@ async function handleLogin(role, session) {
     showLogin(reason === 'idle' ? 'Locked due to inactivity.' : '');
   });
 
-  // Lazy import Surface A
+  // Lazy import Surface A and wire surface router
   const surface = await import('./surfaces/operations.js');
   await surface.init({ role });
+  wireSurfaceRouter(role);
+}
+
+/* ---------- Surface router (Operations / Content / Intelligence) ---------- */
+const surfaceCache = {};
+let _activeSurface = 'operations';
+
+async function showSurface(name, role) {
+  if (name === _activeSurface) return;
+
+  // Sales role is allowed in Operations only (blueprint §10.10)
+  if (role === 'sales' && name !== 'operations') {
+    toast('Sales role: Operations only.', 'warn');
+    return;
+  }
+
+  document.querySelectorAll('.nav-item[data-surface]').forEach(n =>
+    n.classList.toggle('active', n.dataset.surface === name));
+  document.querySelectorAll('.surface').forEach(s =>
+    s.classList.toggle('active', s.id === `surface-${name}`));
+  document.querySelectorAll('.nav-group[data-surface-group]').forEach(g =>
+    g.classList.toggle('active', g.dataset.surfaceGroup === name));
+
+  if (name === 'content') {
+    if (!surfaceCache.content) {
+      surfaceCache.content = await import('./surfaces/content.js');
+    }
+    await surfaceCache.content.init({ role });
+  }
+  // Intelligence surface stays disabled until Surface C ships.
+
+  _activeSurface = name;
+}
+
+function wireSurfaceRouter(role) {
+  if (wireSurfaceRouter._done) return;
+  wireSurfaceRouter._done = true;
+
+  // Sales role: hide Content + Intelligence surface tabs entirely
+  if (role === 'sales') {
+    document.querySelectorAll('.nav-item[data-surface]').forEach(node => {
+      if (node.dataset.surface !== 'operations') node.style.display = 'none';
+    });
+    return;
+  }
+
+  document.querySelectorAll('.nav-item[data-surface]').forEach(node => {
+    if (node.classList.contains('disabled-soon')) return;
+    node.addEventListener('click', () => showSurface(node.dataset.surface, role));
+  });
 }
 
 async function attemptLogin() {

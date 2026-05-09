@@ -55,24 +55,51 @@
     <div class="nav-item active" data-surface="operations">
       <span class="ico">⚡</span><span class="label">Operations</span>
     </div>
-    <div class="nav-item disabled-soon" data-surface="content" title="Surface B — coming soon">
+    <div class="nav-item" data-surface="content">
       <span class="ico">📦</span><span class="label">Content</span>
     </div>
     <div class="nav-item disabled-soon" data-surface="intelligence" title="Surface C — coming soon">
       <span class="ico">📊</span><span class="label">Intelligence</span>
     </div>
 
-    <div class="nav-section-label">Operations</div>
-    <div class="nav-item active" data-module="orders">
-      <span class="ico">🧾</span><span class="label">Orders</span>
-      <span class="badge" id="badge-pending">0</span>
+    <!-- Operations modules (Surface A nav group) -->
+    <div class="nav-group active" data-surface-group="operations">
+      <div class="nav-section-label">Operations</div>
+      <div class="nav-item active" data-module="orders">
+        <span class="ico">🧾</span><span class="label">Orders</span>
+        <span class="badge" id="badge-pending">0</span>
+      </div>
+      <div class="nav-item" data-module="inventory">
+        <span class="ico">📋</span><span class="label">Inventory</span>
+        <span class="badge" id="badge-low">0</span>
+      </div>
+      <div class="nav-item" data-module="customers">
+        <span class="ico">👥</span><span class="label">Customers</span>
+      </div>
     </div>
-    <div class="nav-item" data-module="inventory">
-      <span class="ico">📋</span><span class="label">Inventory</span>
-      <span class="badge" id="badge-low">0</span>
-    </div>
-    <div class="nav-item" data-module="customers">
-      <span class="ico">👥</span><span class="label">Customers</span>
+
+    <!-- Content modules (Surface B nav group). Distinct attribute
+         (data-cmodule) so Surface A's [data-module] handler ignores them. -->
+    <div class="nav-group" data-surface-group="content">
+      <div class="nav-section-label">Content</div>
+      <div class="nav-item active" data-cmodule="products">
+        <span class="ico">🛍️</span><span class="label">Products</span>
+      </div>
+      <div class="nav-item" data-cmodule="categories">
+        <span class="ico">🏷️</span><span class="label">Categories</span>
+      </div>
+      <div class="nav-item" data-cmodule="banners">
+        <span class="ico">🖼️</span><span class="label">Banners</span>
+      </div>
+      <div class="nav-item" data-cmodule="announcements">
+        <span class="ico">📣</span><span class="label">Announcements</span>
+      </div>
+      <div class="nav-item" data-cmodule="discounts">
+        <span class="ico">🎟️</span><span class="label">Discounts</span>
+      </div>
+      <div class="nav-item" data-cmodule="settings">
+        <span class="ico">⚙️</span><span class="label">Settings</span>
+      </div>
     </div>
   </nav>
 
@@ -88,18 +115,28 @@
 
   <!-- Main -->
   <main class="main" id="main">
-    <!-- KPI bar -->
-    <div class="kpi-grid" id="kpi-grid">
-      <div class="kpi"><div class="kpi-label">Revenue Today</div><div class="kpi-value" id="kpi-revenue">₱0</div><div class="kpi-sub" id="kpi-revenue-sub">— orders</div></div>
-      <div class="kpi"><div class="kpi-label">Pending Orders</div><div class="kpi-value" id="kpi-pending">0</div><div class="kpi-sub">awaiting confirmation</div></div>
-      <div class="kpi"><div class="kpi-label">Low Stock</div><div class="kpi-value" id="kpi-low">0</div><div class="kpi-sub">products at/below threshold</div></div>
-      <div class="kpi"><div class="kpi-label">Customers Today</div><div class="kpi-value" id="kpi-cust">0</div><div class="kpi-sub">unique phones</div></div>
+    <!-- Surface A: Operations -->
+    <div class="surface active" id="surface-operations">
+      <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Revenue Today</div><div class="kpi-value" id="kpi-revenue">₱0</div><div class="kpi-sub" id="kpi-revenue-sub">— orders</div></div>
+        <div class="kpi"><div class="kpi-label">Pending Orders</div><div class="kpi-value" id="kpi-pending">0</div><div class="kpi-sub">awaiting confirmation</div></div>
+        <div class="kpi"><div class="kpi-label">Low Stock</div><div class="kpi-value" id="kpi-low">0</div><div class="kpi-sub">products at/below threshold</div></div>
+        <div class="kpi"><div class="kpi-label">Customers Today</div><div class="kpi-value" id="kpi-cust">0</div><div class="kpi-sub">unique phones</div></div>
+      </div>
+      <section class="module-pane active" id="pane-orders"></section>
+      <section class="module-pane" id="pane-inventory"></section>
+      <section class="module-pane" id="pane-customers"></section>
     </div>
 
-    <!-- Module panes (rendered by their JS modules) -->
-    <section class="module-pane active" id="pane-orders"></section>
-    <section class="module-pane" id="pane-inventory"></section>
-    <section class="module-pane" id="pane-customers"></section>
+    <!-- Surface B: Content -->
+    <div class="surface" id="surface-content">
+      <section class="module-pane active" id="pane-products"></section>
+      <section class="module-pane" id="pane-categories"></section>
+      <section class="module-pane" id="pane-banners"></section>
+      <section class="module-pane" id="pane-announcements"></section>
+      <section class="module-pane" id="pane-discounts"></section>
+      <section class="module-pane" id="pane-settings"></section>
+    </div>
   </main>
 
   <!-- Modal mount -->
