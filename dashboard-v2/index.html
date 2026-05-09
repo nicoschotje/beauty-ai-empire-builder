@@ -58,7 +58,7 @@
     <div class="nav-item" data-surface="content">
       <span class="ico">📦</span><span class="label">Content</span>
     </div>
-    <div class="nav-item disabled-soon" data-surface="intelligence" title="Surface C — coming soon">
+    <div class="nav-item" data-surface="intelligence">
       <span class="ico">📊</span><span class="label">Intelligence</span>
     </div>
 
@@ -101,6 +101,24 @@
         <span class="ico">⚙️</span><span class="label">Settings</span>
       </div>
     </div>
+
+    <!-- Intelligence modules (Surface C nav group). Distinct attribute
+         (data-imodule) so Surfaces A and B handlers ignore them. -->
+    <div class="nav-group" data-surface-group="intelligence">
+      <div class="nav-section-label">Intelligence</div>
+      <div class="nav-item active" data-imodule="analytics">
+        <span class="ico">📈</span><span class="label">Analytics</span>
+      </div>
+      <div class="nav-item" data-imodule="intelligence">
+        <span class="ico">🧠</span><span class="label">MBG Clients</span>
+      </div>
+      <div class="nav-item" data-imodule="access-pins">
+        <span class="ico">🔐</span><span class="label">Access PINs</span>
+      </div>
+      <div class="nav-item" data-imodule="reports">
+        <span class="ico">📄</span><span class="label">Reports</span>
+      </div>
+    </div>
   </nav>
 
   <!-- Header -->
@@ -136,6 +154,14 @@
       <section class="module-pane" id="pane-announcements"></section>
       <section class="module-pane" id="pane-discounts"></section>
       <section class="module-pane" id="pane-settings"></section>
+    </div>
+
+    <!-- Surface C: Intelligence -->
+    <div class="surface" id="surface-intelligence">
+      <section class="module-pane active" id="pane-analytics"></section>
+      <section class="module-pane" id="pane-intelligence"></section>
+      <section class="module-pane" id="pane-access-pins"></section>
+      <section class="module-pane" id="pane-reports"></section>
     </div>
   </main>
 

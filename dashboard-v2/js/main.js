@@ -74,7 +74,12 @@ async function showSurface(name, role) {
     }
     await surfaceCache.content.init({ role });
   }
-  // Intelligence surface stays disabled until Surface C ships.
+  if (name === 'intelligence') {
+    if (!surfaceCache.intelligence) {
+      surfaceCache.intelligence = await import('./surfaces/intelligence.js');
+    }
+    await surfaceCache.intelligence.init({ role });
+  }
 
   _activeSurface = name;
 }

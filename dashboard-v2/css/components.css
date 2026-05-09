@@ -303,6 +303,87 @@ label.field-label {
 .filter-row .input { flex: 1 1 160px; max-width: 240px; }
 .filter-row select.input { max-width: 180px; }
 
+/* Sub-tabs (analytics / intelligence) */
+.subtabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.subtabs button {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px 14px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.subtabs button.active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+  font-weight: 600;
+}
+.subpane { display: none; }
+.subpane.active { display: block; }
+
+/* Heatmap cell */
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 60px repeat(24, 1fr);
+  gap: 2px;
+  font-size: 10px;
+}
+.heatmap-grid .hm-label {
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  padding: 2px 4px;
+  text-align: right;
+  white-space: nowrap;
+}
+.heatmap-grid .hm-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--bg-base);
+  position: relative;
+}
+.heatmap-grid .hm-cell:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+/* Action tag pill colors (§10.8) */
+.action-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.tag-reactivate_now    { background: #3D0008; color: #FF4757; }
+.tag-upsell_opportunity { background: #003D32; color: #00C9A7; }
+.tag-discount_control  { background: #3D3300; color: #FFD700; }
+.tag-priority_service  { background: #00204D; color: #4A9EFF; }
+.tag-maintain          { background: #1E2E2A; color: #8FA89F; }
+.tag-low_priority      { background: #161E1C; color: #555; }
+.tag-do_not_chase      { background: #3D1500; color: #FF6B35; }
+
 /* PIN pad */
 .pin-card {
   width: 100%;
