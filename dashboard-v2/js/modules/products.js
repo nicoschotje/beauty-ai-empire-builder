@@ -256,15 +256,22 @@ function openForm(p) {
   `;
   modalBackdrop.classList.add('show');
 
-  // Image upload handler
+  // Image upload handler — gates the Save button so the user can't submit
+  // while the upload is still in flight (which would save with image_url=null
+  // for a new product, or the previous URL when editing).
+  const saveBtn = modalBody.querySelector('[data-act="save"]');
   modalBody.querySelector('#f-img').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const status = modalBody.querySelector('#f-img-status');
+    const status   = modalBody.querySelector('#f-img-status');
+    const urlField = modalBody.querySelector('#f-img-url');
     status.textContent = 'Uploading…';
+    status.style.color = 'var(--text-muted)';
+    urlField.value = '';
+    saveBtn.disabled = true;
     try {
       const url = await uploadProductImage(file);
-      modalBody.querySelector('#f-img-url').value = url;
+      urlField.value = url;
       const img = modalBody.querySelector('#f-img-preview');
       img.src = url; img.style.display = '';
       status.textContent = 'Uploaded ✓';
@@ -272,6 +279,10 @@ function openForm(p) {
     } catch (err) {
       status.textContent = err.message || 'Upload failed';
       status.style.color = 'var(--red)';
+      // Image is optional for products — re-enable Save so the user can
+      // still create the row without an image, or pick a different file.
+    } finally {
+      saveBtn.disabled = false;
     }
   });
 
