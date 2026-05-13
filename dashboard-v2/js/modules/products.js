@@ -307,9 +307,6 @@ async function save(existing) {
           stock_qty: parseInt(modalBody.querySelector('#f-stock').value, 10) || 0,
           low_stock_threshold: parseInt(modalBody.querySelector('#f-thr').value, 10) || 0,
           category_id: catSelect.value || null,
-          // Also store category name so the storefront can match products to categories
-          // The storefront uses p.category (string name) in productMatchesCat()
-          category: catSelect.selectedOptions[0]?.text || null,
           sku: modalBody.querySelector('#f-sku').value.trim() || null,
           sort_order: parseInt(modalBody.querySelector('#f-sort').value, 10) || 0,
           tags: modalBody.querySelector('#f-tags').value.split(',').map(s => s.trim()).filter(Boolean),
