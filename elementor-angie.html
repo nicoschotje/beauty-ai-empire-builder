@@ -155,6 +155,7 @@ input,textarea,select{font-family:inherit}
 .blk-tools button{width:24px;height:24px;border-radius:5px;font-size:12px;color:var(--muted)}
 .blk-tools button:hover{background:var(--grad);color:#fff}
 [contenteditable]{outline:none}
+.blk-edit{outline:none}
 .editing [contenteditable]:focus{box-shadow:0 0 0 2px #ff2d7e55;border-radius:3px}
 .img-drop{outline:3px dashed var(--accent)!important;outline-offset:-3px}
 
@@ -354,6 +355,56 @@ textarea.inp{resize:vertical;min-height:58px;line-height:1.45}
 .anim-left{transform:translateX(-50px);transition:opacity .7s ease,transform .7s ease}
 .anim-scale{transform:scale(.85);transition:opacity .7s ease,transform .7s ease}
 .anim-show{opacity:1!important;transform:none!important}
+
+/* export menu */
+.tb-menu-wrap{position:relative}
+.tb-menu{
+  position:absolute;top:40px;right:0;width:220px;background:var(--panel);
+  border:1px solid var(--border-2);border-radius:10px;padding:5px;z-index:80;
+  box-shadow:var(--shadow);
+}
+.tb-menu button{
+  display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;
+  border-radius:8px;font-size:12.5px;font-weight:600;color:var(--text);text-align:left;
+}
+.tb-menu button:hover{background:var(--grad-soft)}
+.tb-menu button span{width:22px;text-align:center;font-size:13px;color:var(--accent)}
+.tb-menu button small{margin-left:auto;color:var(--muted-2);font-size:10px;font-weight:500}
+
+/* onboarding tour */
+#tour{position:fixed;inset:0;background:#0b0c11e6;backdrop-filter:blur(6px);
+  z-index:85;display:flex;align-items:center;justify-content:center}
+.tour-card{
+  width:440px;max-width:92vw;background:linear-gradient(180deg,#1b1c28,#14151f);
+  border:1px solid var(--border-2);border-radius:18px;padding:30px 30px 24px;
+  position:relative;box-shadow:0 40px 90px -20px #000;text-align:center;
+}
+.tour-skip{position:absolute;top:14px;right:16px;font-size:11px;color:var(--muted-2)}
+.tour-skip:hover{color:var(--text)}
+.tour-art{
+  width:74px;height:74px;margin:0 auto 14px;border-radius:20px;
+  background:linear-gradient(135deg,#7c3aed,#c026d3);display:grid;place-items:center;
+  font-size:34px;box-shadow:0 14px 36px #7c3aed66;
+}
+.tour-step-n{font-size:10.5px;font-weight:700;letter-spacing:1px;color:var(--accent);
+  text-transform:uppercase;margin-bottom:6px}
+.tour-t{font-size:21px;font-weight:800;margin-bottom:9px}
+.tour-d{font-size:13.5px;line-height:1.6;color:var(--muted);margin-bottom:18px}
+.tour-dots{display:flex;gap:6px;justify-content:center;margin-bottom:18px}
+.tour-dots i{width:7px;height:7px;border-radius:50%;background:var(--border-2)}
+.tour-dots i.on{background:var(--accent);width:22px;border-radius:4px}
+.tour-nav{display:flex;gap:9px}
+.tour-nav .btn-sm{height:38px;font-size:13px}
+
+/* speed / pagespeed panel */
+.speed-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.smetric{background:var(--panel-2);border:1px solid var(--border);border-radius:9px;
+  padding:9px 11px}
+.smetric .v{font-size:17px;font-weight:800}
+.smetric .l{font-size:10px;color:var(--muted-2);margin-top:2px;text-transform:uppercase;
+  letter-spacing:.5px}
+.fix-manual{font-size:9.5px;font-weight:700;color:var(--warn);
+  border:1px solid #f59e0b44;border-radius:5px;padding:3px 7px}
 </style>
 </head>
 <body>
@@ -374,9 +425,17 @@ textarea.inp{resize:vertical;min-height:58px;line-height:1.45}
   <button class="tb-btn icon" id="btnUndo" title="Undo (⌘Z)">↶</button>
   <button class="tb-btn icon" id="btnRedo" title="Redo (⌘⇧Z)">↷</button>
   <div class="tb-sep"></div>
-  <button class="tb-btn icon" id="btnPreview" title="Preview">▶</button>
-  <button class="tb-btn" id="btnExport" title="Export HTML">⬇ Export</button>
+  <button class="tb-btn icon" id="btnPreview" title="Preview (⌘P)">▶</button>
+  <div class="tb-menu-wrap">
+    <button class="tb-btn" id="btnExport" title="Export">⬇ Export ▾</button>
+    <div class="tb-menu hide" id="exportMenu">
+      <button data-x="html"><span>⬇</span> Export HTML<small>standalone page</small></button>
+      <button data-x="json"><span>{ }</span> Export JSON<small>page AST</small></button>
+      <button data-x="embed"><span>⧉</span> Copy Embed Snippet<small>iframe code</small></button>
+    </div>
+  </div>
   <button class="tb-btn" id="btnSave" title="Save (⌘S)">💾 Save</button>
+  <button class="tb-btn icon" id="btnTour" title="Onboarding tour">🎓</button>
   <button class="tb-btn angie" id="btnAngie" title="Ask Angie (⌘K)">✦ Ask Angie</button>
 </div>
 
@@ -431,6 +490,7 @@ textarea.inp{resize:vertical;min-height:58px;line-height:1.45}
   <div class="ag-tabs" id="agTabs">
     <button data-t="chat" class="on">Chat</button>
     <button data-t="audit">Audit <span class="badge" id="agBadge">0</span></button>
+    <button data-t="speed">Speed</button>
   </div>
   <div class="ag-body" id="agBody"></div>
   <div class="ag-foot" id="agFoot">
@@ -450,6 +510,20 @@ textarea.inp{resize:vertical;min-height:58px;line-height:1.45}
     <span class="k">ESC</span>
   </div>
   <div class="cmd-list" id="cmdList"></div>
+</div>
+<div id="tour" class="hide">
+  <div class="tour-card">
+    <button class="tour-skip" id="tourSkip">Skip tour</button>
+    <div class="tour-art" id="tourArt">✦</div>
+    <div class="tour-step-n" id="tourStepN"></div>
+    <div class="tour-t" id="tourT"></div>
+    <div class="tour-d" id="tourD"></div>
+    <div class="tour-dots" id="tourDots"></div>
+    <div class="tour-nav">
+      <button class="btn-sm" id="tourBack">Back</button>
+      <button class="btn-sm accent" id="tourNext">Next →</button>
+    </div>
+  </div>
 </div>
 <div id="toasts"></div>
 
@@ -587,19 +661,32 @@ function gNavbar(o){
 }
 
 function gHero(o){
+  o=o||{};
   const grad=o.gradient!==false;
   const dark=o.dark;
-  const bg = grad?'linear-gradient(135deg,#ff2d7e 0%,#c026d3 55%,#7c3aed 100%)'
-            :(dark?'#0d0e14':'#fff5f9');
+  const bg = grad
+    ?(dark?'linear-gradient(160deg,#17122b 0%,#3a1d57 55%,#0c0d13 100%)'
+          :'linear-gradient(135deg,#ff2d7e 0%,#c026d3 55%,#7c3aed 100%)')
+    :(dark?'#0d0e14':'#fff5f9');
   const fg = (grad||dark)?'#ffffff':'#0d0e14';
+  let eyebrow='✦ AI-CRAFTED BEAUTY EXPERIENCE';
+  let headline='Build Your Beauty Empire';
+  let sub='Angie turns a sentence into a launch-ready landing page — luxe layouts, '
+    +'conversion copy and on-brand styling, generated in seconds.';
+  if(o.product){
+    const adjs=(o.adjectives&&o.adjectives.length)?o.adjectives.slice(0,3):['fast','simple'];
+    eyebrow='✦ '+adjs.join(' · ').toUpperCase();
+    headline='The '+o.product+' you’ll actually love';
+    sub='A '+adjs[0]+' way to get more done — set up '+o.product
+      +' in minutes, and let your whole team move faster.';
+  }
   const sec=SEC('Hero',{padding:'104px 32px',background:bg,color:fg,textAlign:'center'},[
-    T('✦ AI-CRAFTED BEAUTY EXPERIENCE',{fontSize:'13px',letterSpacing:'2.5px',
+    T(eyebrow,{fontSize:'13px',letterSpacing:'2.5px',
       fontWeight:'700',opacity:'.85',marginBottom:'18px'}),
-    H('h1','Build Your Beauty Empire',{fontSize:'62px',fontWeight:'800',lineHeight:'1.05',
+    H('h1',headline,{fontSize:'62px',fontWeight:'800',lineHeight:'1.05',
       maxWidth:'820px',margin:'0 auto 20px',fontFamily:"'Playfair Display', serif"}),
-    T('Angie turns a sentence into a launch-ready landing page — luxe layouts, '
-      +'conversion copy and on-brand styling, generated in seconds.',
-      {fontSize:'20px',lineHeight:'1.5',opacity:'.9',maxWidth:'620px',margin:'0 auto 34px'}),
+    T(sub,{fontSize:'20px',lineHeight:'1.5',opacity:'.9',
+      maxWidth:'620px',margin:'0 auto 34px'}),
     ROW({justifyContent:'center',gap:'14px'},[
       B('Start Free Trial',{background:(grad||dark)?'#ffffff':'linear-gradient(135deg,#ff2d7e,#c026d3)',
         color:(grad||dark)?'#c026d3':'#fff',padding:'15px 32px',borderRadius:'11px',
@@ -726,12 +813,15 @@ function gCTA(o){
 }
 
 function gFAQ(o){
+  const n=Math.min(Math.max((o&&o.count)||4,2),6);
   const items=[
     ['Do I need to know how to code?','Not at all. Describe what you want in plain English and Angie generates editable visual blocks. You can fine-tune everything with the inspector.'],
     ['Is the AI really offline?','Yes — Angie runs a deterministic intent engine in your browser. No API keys, no network calls, fully private.'],
-    ['Can I export my page?','Absolutely. Export clean, portable HTML with inline styles and zero builder bloat.'],
+    ['Can I export my page?','Absolutely. Export clean, portable HTML, structured JSON, or a ready-to-paste embed snippet.'],
     ['Will it match my brand?','Every block inherits your palette and type scale. The audit agent flags off-brand contrast and spacing live.'],
-  ];
+    ['Can my team collaborate?','Studio and Empire plans include shared workspaces so your whole team can edit and audit pages together.'],
+    ['Where is my data stored?','Your page lives in your browser via localStorage. Nothing is uploaded — export whenever you want a copy.'],
+  ].slice(0,n);
   return SEC('FAQ',{padding:'84px 40px',background:'#fff'},[
     H('h2','Frequently asked questions',{fontSize:'38px',fontWeight:'800',textAlign:'center',
       marginBottom:'40px',fontFamily:"'Playfair Display', serif",color:'#0d0e14'}),
@@ -872,15 +962,14 @@ const GENERATORS = {
 const NUMWORDS={one:1,two:2,three:3,four:4,five:5,six:6,'a':1,'single':1,
   'couple':2,'few':3,'several':3};
 function numNear(text,kw){
-  /* find a number adjacent to a keyword */
-  const re=new RegExp('(\\d+|'+Object.keys(NUMWORDS).join('|')+
-    ')[-\\s]?(?:\\w+\\s){0,2}?'+kw,'i');
-  const m=text.match(re);
+  /* find a number adjacent to a keyword (kw alternation is grouped so the
+     capture group is always group 1) */
+  const nums='(\\d+|'+Object.keys(NUMWORDS).join('|')+')';
+  const k='(?:'+kw+')';
+  let m=text.match(new RegExp(nums+'[-\\s]?(?:\\w+\\s){0,2}?'+k,'i'));
   if(m){const v=m[1].toLowerCase();return parseInt(v)||NUMWORDS[v]||null;}
-  const re2=new RegExp(kw+'[-\\s]?(?:of\\s)?(?:\\w+\\s){0,1}?(\\d+|'+
-    Object.keys(NUMWORDS).join('|')+')','i');
-  const m2=text.match(re2);
-  if(m2){const v=m2[1].toLowerCase();return parseInt(v)||NUMWORDS[v]||null;}
+  m=text.match(new RegExp(k+'[-\\s]?(?:of\\s)?(?:\\w+\\s){0,1}?'+nums,'i'));
+  if(m){const v=m[1].toLowerCase();return parseInt(v)||NUMWORDS[v]||null;}
   return null;
 }
 
@@ -902,8 +991,40 @@ const SECTION_PATTERNS=[
   ['footer',     /\b(footer|bottom section|site footer)\b/],
 ];
 
+/* ---- full-page template detection ---- */
+const FULLPAGE=/\b(landing page|full page|whole (?:site|page|website)|complete (?:site|page|website)|home ?page|build (?:me )?an? (?:site|website|page)|saas (?:site|page)|marketing (?:site|page))\b/;
+const TEMPLATE_ORDER=['navbar','hero','features','stats','testimonials','pricing','faq','cta','footer'];
+const ADJ_POOL=['modern','friendly','minimal','bold','playful','elegant','luxury',
+  'professional','clean','vibrant','sleek','warm','futuristic','calm'];
+function prettyProduct(p){
+  return p.replace(/\b(ai|saas|crm|api|seo|ui|ux)\b/gi,m=>m.toUpperCase()).trim();
+}
+function extractProduct(t){
+  let m=t.match(/\bfor (?:an?|the|your) ([^,.;]+)/);
+  if(m) return prettyProduct(m[1]);
+  m=t.match(/(?:landing page|website|site|page|app|saas)\s+(?:for|about|to)\s+([^,.;]+)/);
+  if(m) return prettyProduct(m[1]);
+  return null;
+}
+function extractAdjectives(t){
+  return ADJ_POOL.filter(a=>new RegExp('\\b'+a+'\\b').test(t));
+}
+
 function parseIntent(raw){
   const text=' '+raw.toLowerCase().trim()+' ';
+  const gradient=/\bgradient\b/.test(text);
+  const dark=/\bdark\b/.test(text);
+  /* whole-page template request */
+  if(FULLPAGE.test(text)){
+    const product=extractProduct(text);
+    const adjectives=extractAdjectives(text);
+    return {
+      template:true, product, adjectives,
+      sections:TEMPLATE_ORDER.map(k=>({kind:k,
+        opts:{gradient:true,dark:false,product,adjectives}})),
+    };
+  }
+  /* section-by-section request */
   const found=[];
   for(const [kind,re] of SECTION_PATTERNS){
     const m=text.match(re);
@@ -911,12 +1032,11 @@ function parseIntent(raw){
   }
   if(!found.length) return {sections:[],unknown:true};
   found.sort((a,b)=>a.idx-b.idx);
-  const gradient=/\bgradient\b/.test(text);
-  const dark=/\bdark\b/.test(text);
   const sections=found.map(f=>{
     const o={gradient,dark};
     if(f.kind==='pricing') o.count=numNear(text,'tiers?|plans?|packages?|columns?')||3;
     if(f.kind==='features') o.count=numNear(text,'features?|benefits?|cards?|columns?|items?')||3;
+    if(f.kind==='faq') o.count=numNear(text,'items?|questions?|faqs?|rows?')||4;
     return {kind:f.kind,opts:o};
   });
   return {sections};
@@ -1025,11 +1145,18 @@ function applyStyles(dom,node){
     else dom.style[k]=v;
   }
 }
-function editable(dom,node,field){
-  if(state.preview) return;
-  dom.contentEditable='true';
-  dom.spellcheck=false;
-  dom.dataset.edit=field||'content';
+/* editable leaf content lives in its own inner span so the block chrome
+   (tag + tools) is never part of the contentEditable surface */
+function appendEditable(dom,node){
+  const span=document.createElement('span');
+  span.className='blk-edit';
+  span.textContent=node.content||'';
+  if(!state.preview){
+    span.setAttribute('contenteditable','true');
+    span.spellcheck=false;
+    span.dataset.edit='content';
+  }
+  dom.appendChild(span);
 }
 
 function renderNode(node){
@@ -1043,17 +1170,17 @@ function renderNode(node){
     dom=document.createElement('div'); dom.className='blk blk-col';
   } else if(t==='heading'){
     dom=document.createElement(node.props.level||'h2');
-    dom.className='blk blk-heading'; dom.textContent=node.content||'';
-    editable(dom,node);
+    dom.className='blk blk-heading';
+    appendEditable(dom,node);
   } else if(t==='text'){
     dom=document.createElement('p'); dom.className='blk blk-text';
-    dom.textContent=node.content||''; editable(dom,node);
+    appendEditable(dom,node);
   } else if(t==='button'){
     dom=document.createElement('a'); dom.className='blk blk-button';
-    dom.href='javascript:void 0'; dom.textContent=node.content||'Button';
+    dom.href='javascript:void 0';
     dom.style.display='inline-block'; dom.style.textDecoration='none';
     dom.style.cursor='pointer';
-    editable(dom,node);
+    appendEditable(dom,node);
   } else if(t==='image'){
     dom=document.createElement('img'); dom.className='blk blk-image';
     dom.src=node.props.src||ph('Image',400,300);
@@ -1061,7 +1188,7 @@ function renderNode(node){
     dom.style.display='block'; dom.style.objectFit='cover';
   } else if(t==='icon'){
     dom=document.createElement('div'); dom.className='blk blk-icon';
-    dom.textContent=node.content||'✦'; editable(dom,node);
+    appendEditable(dom,node);
   } else if(t==='divider'){
     dom=document.createElement('hr'); dom.className='blk blk-divider';
     dom.style.border='none'; dom.style.borderTop='1px solid '+(node.styles.borderColor||'#e5e5ea');
@@ -1080,7 +1207,7 @@ function renderNode(node){
       ic.style.cssText='color:#10b981;font-weight:800;flex-shrink:0';
       const tx=document.createElement('span');
       tx.textContent=it;
-      if(!state.preview){tx.contentEditable='true';tx.spellcheck=false;
+      if(!state.preview){tx.setAttribute('contenteditable','true');tx.spellcheck=false;
         tx.dataset.edit='list';tx.dataset.idx=i;}
       li.append(ic,tx); dom.appendChild(li);
     });
@@ -1102,9 +1229,9 @@ function renderNode(node){
       const item=document.createElement('div');
       item.className='faq-item'+(i===0?' open':'');
       item.innerHTML=`<div class="faq-q"><span data-edit="faqq" data-idx="${i}"`+
-        `${state.preview?'':' contenteditable'}>${esc(it.q)}</span><span class="x">+</span></div>`+
+        `${state.preview?'':' contenteditable="true"'}>${esc(it.q)}</span><span class="x">+</span></div>`+
         `<div class="faq-a"><span data-edit="faqa" data-idx="${i}"`+
-        `${state.preview?'':' contenteditable'}>${esc(it.a)}</span></div>`;
+        `${state.preview?'':' contenteditable="true"'}>${esc(it.a)}</span></div>`;
       item.querySelector('.faq-q').addEventListener('click',e=>{
         if(e.target.dataset.edit) return;
         item.classList.toggle('open');
@@ -1308,14 +1435,12 @@ function generateFromIntent(raw){
   const res=parseIntent(raw);
   if(res.unknown||!res.sections.length) return null;
   snapshot();
-  const created=[];
-  res.sections.forEach(s=>{
-    const sec=addSection(s.kind,s.opts,false);
-    created.push(sec);
-  });
+  if(res.template) state.page.root.children=[];   /* full page = fresh build */
+  const created=res.sections.map(s=>addSection(s.kind,s.opts,false));
   renderAll();
   if(created.length) selectNode(created[0].id);
   audit();
+  state._lastResult={template:!!res.template,product:res.product,count:created.length};
   return created;
 }
 
@@ -1434,8 +1559,10 @@ function setStyle(node,key,val){
 function liveContent(node){
   const dom=$(`[data-id="${node.id}"]`);
   if(!dom) return;
-  if(node.type==='heading'||node.type==='text'||node.type==='button'||node.type==='icon')
-    dom.textContent=node.content;
+  if(['heading','text','button','icon'].includes(node.type)){
+    const e=dom.querySelector('.blk-edit');
+    if(e) e.textContent=node.content;
+  }
   if(node.type==='image'){dom.src=node.props.src;dom.alt=node.props.alt||'';}
 }
 
@@ -1858,6 +1985,8 @@ function renderAngie(){
       body.appendChild(d);
     });
     body.scrollTop=body.scrollHeight;
+  } else if(state.agTab==='speed'){
+    renderSpeedPanel(body);
   } else {
     renderAuditPanel(body);
   }
@@ -1874,10 +2003,18 @@ function angieSend(text){
   /* otherwise generate sections */
   const created=generateFromIntent(text);
   if(created){
-    const names=created.map(c=>c.props.label).join(', ');
-    agMsg('a',`Done — I added <b>${created.length}</b> section`
-      +`${created.length>1?'s':''}: <b>${esc(names)}</b>. `
-      +`They're live on the canvas and fully editable. Want me to audit them?`);
+    const r=state._lastResult||{};
+    if(r.template){
+      agMsg('a',`Built a complete <b>${created.length}-section</b> page`
+        +`${r.product?' for <b>'+esc(r.product)+'</b>':''} — navbar, hero, features, `
+        +`stats, testimonials, pricing, FAQ, CTA and footer. Every block is live `
+        +`and editable. Check the <b>Audit</b> and <b>Speed</b> tabs for a health report.`);
+    } else {
+      const names=created.map(c=>c.props.label).join(', ');
+      agMsg('a',`Done — I added <b>${created.length}</b> section`
+        +`${created.length>1?'s':''}: <b>${esc(names)}</b>. `
+        +`They're live on the canvas and fully editable. Want me to audit them?`);
+    }
     save(true);
   } else {
     agMsg('a',`I parse layouts from natural language. Try naming sections — `
@@ -2075,9 +2212,10 @@ function audit(){
   const penalty=S.reduce((a,s)=>a+(s.sev==='err'?14:s.sev==='warn'?8:3),0);
   state.suggestions=S;
   state.auditScore=Math.max(12,100-penalty);
+  state.perf=perfAudit();
   $('#agBadge').textContent=S.length;
   $('#agBadge').style.display=S.length?'inline':'none';
-  if(state.agTab==='audit') renderAngie();
+  if(state.agTab==='audit'||state.agTab==='speed') renderAngie();
   return S;
 }
 let _auditT=null;
@@ -2223,7 +2361,7 @@ function exportNode(n,ind){
   if(n.type==='input') return `${pad}<input placeholder="${esc(n.props.placeholder||'')}" style="width:100%;padding:13px;border:1px solid #ddd;border-radius:10px"/>`;
   return `${pad}<div${sa}>${kids()}</div>`;
 }
-function exportHTML(){
+function buildExportHTML(){
   const s=state.page.settings;
   const bodyHtml=state.page.root.children.map(c=>exportNode(c,2)).join('\n');
   const html=`<!doctype html>
@@ -2241,13 +2379,49 @@ ${bodyHtml}
 <!-- Built with Elementor Angie 2026 -->
 </body>
 </html>`;
-  const blob=new Blob([html],{type:'text/html'});
+  return html;
+}
+function slugTitle(){
+  return (state.page.settings.title||'page').toLowerCase()
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'page';
+}
+function download(name,content,type){
+  const blob=new Blob([content],{type});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=(s.title||'page').toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.html';
-  a.click();
-  URL.revokeObjectURL(a.href);
-  toast('Clean HTML exported','⬇');
+  a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function exportHTML(){
+  download(slugTitle()+'.html',buildExportHTML(),'text/html');
+  toast('Standalone HTML exported','⬇');
+}
+function exportJSON(){
+  download(slugTitle()+'.angie.json',JSON.stringify(state.page,null,2),'application/json');
+  toast('Page JSON exported','{ }');
+}
+function buildEmbedSnippet(){
+  const full=buildExportHTML().replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+  return '<!-- Elementor Angie embed — '+esc(state.page.settings.title)+' -->\n'
+    +'<iframe srcdoc="'+full+'" title="'+esc(state.page.settings.title)+'" '
+    +'style="width:100%;height:900px;border:0;border-radius:12px" '
+    +'loading="lazy"></iframe>';
+}
+function fallbackCopy(text,done){
+  const ta=document.createElement('textarea');
+  ta.value=text; ta.style.cssText='position:fixed;opacity:0;top:0';
+  document.body.appendChild(ta); ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  ta.remove(); done();
+}
+function copyEmbed(){
+  const snip=buildEmbedSnippet();
+  state._lastEmbed=snip;
+  const done=()=>toast('Embed snippet copied to clipboard','⧉');
+  if(navigator.clipboard && navigator.clipboard.writeText)
+    navigator.clipboard.writeText(snip).then(done).catch(()=>fallbackCopy(snip,done));
+  else fallbackCopy(snip,done);
 }
 
 /* ============================================================
@@ -2384,7 +2558,11 @@ const CMDS=[
   ['Action','↷ Redo','⌘⇧Z',null,()=>redo()],
   ['Action','▶ Toggle preview','⌘P',null,()=>togglePreview()],
   ['Action','⬇ Export HTML','',null,()=>exportHTML()],
+  ['Action','{ } Export JSON','',null,()=>exportJSON()],
+  ['Action','⧉ Copy Embed Snippet','',null,()=>copyEmbed()],
   ['Action','🩺 Run audit','',null,()=>{state.agTab='audit';openAngie(false);renderAngie();}],
+  ['Action','⚡ PageSpeed optimizer','',null,()=>{state.agTab='speed';openAngie(false);renderAngie();}],
+  ['Action','🎓 Replay onboarding tour','',null,()=>startTour()],
 ];
 LIBRARY.forEach(([k,em,n])=>CMDS.push(['Insert',em+' Add '+n+' block','',null,
   ()=>{snapshot();const s=addSection(k,{},false);renderAll();selectNode(s.id);audit();}]));
@@ -2423,14 +2601,215 @@ function renderCmd(){
 }
 
 /* ============================================================
+   PAGESPEED OPTIMIZER
+   ============================================================ */
+function perfAudit(){
+  buildParentMap(state.page.root);
+  const all=flatten(state.page.root);
+  const imgs=all.filter(n=>n.type==='image');
+  let score=100; const items=[]; const metrics={};
+
+  /* CLS — images without reserved space */
+  const noDim=imgs.filter(n=>!n.styles.height&&!n.styles.aspectRatio
+    &&!(/px$/.test(n.styles.width||'')));
+  metrics.cls=noDim.length?'At risk':'Stable';
+  if(noDim.length){
+    score-=Math.min(24,noDim.length*6);
+    items.push({sev:'warn',
+      title:noDim.length+' image'+(noDim.length>1?'s':'')+' can shift layout (CLS)',
+      detail:'Images without a reserved aspect-ratio push content down as they '
+        +'load, causing Cumulative Layout Shift. Reserving space fixes it.',
+      fix:()=>noDim.forEach(n=>setStyle(n,'aspectRatio','4 / 3'))});
+  }
+  /* heavy embedded images */
+  const heavy=imgs.filter(n=>(n.props.src||'').length>100000);
+  if(heavy.length){
+    score-=Math.min(20,heavy.length*9);
+    items.push({sev:'err',
+      title:heavy.length+' oversized embedded image'+(heavy.length>1?'s':''),
+      detail:'Large base64 images inflate the document and delay first paint. '
+        +'Compress them or host them on a CDN.',manual:true});
+  }
+  /* font families */
+  const fonts=new Set(['Inter (default)']);
+  all.forEach(n=>{if(n.styles.fontFamily)fonts.add(n.styles.fontFamily);});
+  metrics.fonts=fonts.size;
+  if(fonts.size>2){
+    score-=(fonts.size-2)*7;
+    items.push({sev:'warn',title:fonts.size+' font families load',
+      detail:'Every web font is a render-blocking request. Consolidating to one '
+        +'family speeds up First Contentful Paint.',
+      fix:()=>{const keep=[...fonts].find(f=>f!=='Inter (default)');
+        if(keep) all.forEach(n=>{if(n.styles.fontFamily)setStyle(n,'fontFamily',keep);});}});
+  }
+  /* DOM size */
+  metrics.dom=all.length;
+  if(all.length>120){
+    score-=12;
+    items.push({sev:'info',title:'Large DOM ('+all.length+' nodes)',
+      detail:'Browsers render fewer nodes faster. Trim decorative blocks or '
+        +'split very long pages.',manual:true});
+  }
+  /* document weight */
+  const weight=buildExportHTML().length;
+  metrics.weight=Math.round(weight/1024)+' KB';
+  if(weight>45000){
+    score-=Math.min(14,Math.round((weight-45000)/4000));
+    items.push({sev:'info',title:'Document weight '+metrics.weight,
+      detail:'Inline-styled markup is portable but heavy. Extract shared styles '
+        +'to a stylesheet for production builds.',manual:true});
+  }
+  /* above-the-fold animations delay LCP (first ~2 sections) */
+  const aboveFold=state.page.root.children.slice(0,2);
+  if(aboveFold.length){
+    const fa=[];
+    aboveFold.forEach(s=>flatten(s).forEach(n=>{
+      if(n.anim&&n.anim.type!=='none') fa.push(n);
+    }));
+    if(fa.length){
+      score-=6;
+      items.push({sev:'warn',
+        title:fa.length+' animation'+(fa.length>1?'s':'')+' above the fold',
+        detail:'Entrance animations on the first section delay Largest '
+          +'Contentful Paint. Disable them so hero content renders instantly.',
+        fix:()=>fa.forEach(n=>n.anim.type='none')});
+    }
+  }
+  score=Math.max(20,Math.round(score));
+  return {score,items,metrics};
+}
+function renderSpeedPanel(body){
+  const p=state.perf||perfAudit();
+  body.innerHTML='';
+  const score=p.score;
+  const col=score>=85?'#10b981':score>=60?'#f59e0b':'#ef4444';
+  const dash=Math.PI*2*22;
+  const ring=document.createElement('div'); ring.className='audit-score';
+  ring.innerHTML=`<div class="score-ring"><svg width="54" height="54">`
+    +`<circle cx="27" cy="27" r="22" fill="none" stroke="#ffffff14" stroke-width="6"/>`
+    +`<circle cx="27" cy="27" r="22" fill="none" stroke="${col}" stroke-width="6" `
+    +`stroke-linecap="round" stroke-dasharray="${dash}" `
+    +`stroke-dashoffset="${dash*(1-score/100)}" transform="rotate(-90 27 27)"/></svg>`
+    +`<div class="num" style="color:${col}">${score}</div></div>`
+    +`<div><div class="lbl">PageSpeed score</div>`
+    +`<div class="sub">Estimated · Core Web Vitals heuristics</div></div>`;
+  body.appendChild(ring);
+  const m=p.metrics;
+  const mg=document.createElement('div'); mg.className='speed-metrics';
+  mg.innerHTML=
+     `<div class="smetric"><div class="v">${m.dom}</div><div class="l">DOM nodes</div></div>`
+    +`<div class="smetric"><div class="v">${m.weight}</div><div class="l">Doc weight</div></div>`
+    +`<div class="smetric"><div class="v">${m.fonts}</div><div class="l">Font families</div></div>`
+    +`<div class="smetric"><div class="v">${m.cls}</div><div class="l">Layout shift</div></div>`;
+  body.appendChild(mg);
+  if(!p.items.length){
+    body.innerHTML+='<div class="empty-sug"><span class="em">⚡</span>'
+      +'<b>Blazing fast!</b><br>No PageSpeed issues detected.</div>';
+    return;
+  }
+  p.items.forEach(it=>{
+    const sevEm={err:'⛔',warn:'⚠️',info:'💡'}[it.sev]||'💡';
+    const card=document.createElement('div'); card.className='sug '+it.sev;
+    card.innerHTML=`<div class="sug-h"><span class="sev">${sevEm}</span>`
+      +`<span class="t">${it.title}</span></div><div class="sug-d">${it.detail}</div>`;
+    const act=document.createElement('div'); act.className='sug-act';
+    if(it.fix){
+      const b=document.createElement('button');
+      b.className='sug-apply'; b.textContent='⚡ One-click fix';
+      b.addEventListener('click',()=>{
+        snapshot(); it.fix(); renderAll(); save(true); audit();
+        toast('Speed fix applied','⚡');
+      });
+      act.appendChild(b);
+    } else {
+      const s=document.createElement('span');
+      s.className='fix-manual'; s.textContent='MANUAL';
+      act.appendChild(s);
+    }
+    card.appendChild(act);
+    body.appendChild(card);
+  });
+}
+
+/* ============================================================
+   ONBOARDING TOUR
+   ============================================================ */
+const SAMPLE_PROMPT='SaaS landing page for an AI scheduling tool, modern, friendly.';
+const TOUR=[
+  {art:'✦',n:'Welcome',t:'Meet Angie',
+   d:'Your agentic page builder. Describe a layout in plain English and Angie '
+    +'generates real, editable blocks — 100% offline, no API keys.'},
+  {art:'🧱',n:'Step 1 of 4',t:'Blocks & Layers',
+   d:'The left panel shows every block as a live tree. Switch to the Blocks tab '
+    +'to drop in ready-made composite sections.'},
+  {art:'🎛',n:'Step 2 of 4',t:'The Inspector',
+   d:'Select any block to fine-tune typography, the visual box-model, colors, '
+    +'gradients, borders, shadows and scroll animations.'},
+  {art:'🩺',n:'Step 3 of 4',t:'Live Audits & PageSpeed',
+   d:'Angie continuously checks SEO, accessibility, conversion and PageSpeed — '
+    +'every issue ships with a one-click fix.'},
+  {art:'🚀',n:'Step 4 of 4',t:'Build your first page',
+   d:'Ready? Angie will generate a complete sample SaaS landing page so you can '
+    +'explore a real, multi-section project.',build:true},
+];
+let tourIdx=0;
+function startTour(){ tourIdx=0; $('#tour').classList.remove('hide'); tourRender(); }
+function closeTour(){
+  $('#tour').classList.add('hide');
+  try{localStorage.setItem('angie_tour_done','1');}catch(e){}
+}
+function tourRender(){
+  const s=TOUR[tourIdx];
+  $('#tourArt').textContent=s.art;
+  $('#tourStepN').textContent=s.n;
+  $('#tourT').textContent=s.t;
+  $('#tourD').textContent=s.d;
+  $('#tourDots').innerHTML=TOUR.map((_,i)=>
+    `<i class="${i===tourIdx?'on':''}"></i>`).join('');
+  $('#tourBack').style.visibility=tourIdx===0?'hidden':'visible';
+  $('#tourNext').textContent=s.build?'🚀 Build my sample page':'Next →';
+}
+function tourNext(){
+  if(TOUR[tourIdx].build){ closeTour(); buildSample(); return; }
+  tourIdx=Math.min(TOUR.length-1,tourIdx+1); tourRender();
+}
+function tourBack(){ tourIdx=Math.max(0,tourIdx-1); tourRender(); }
+function buildSample(){
+  const created=generateFromIntent(SAMPLE_PROMPT);
+  save(true);
+  state.agTab='chat';
+  agMsg('u',SAMPLE_PROMPT);
+  agMsg('a',`Built your sample — a complete <b>${created?created.length:9}-section</b> `
+    +`SaaS landing page for an <b>AI scheduling tool</b>. Explore the `
+    +`<b>Audit</b> and <b>Speed</b> tabs, then edit anything inline.`);
+  openAngie(false);
+  toast('Sample SaaS landing page built','🚀');
+}
+
+/* ============================================================
    WIRE UP UI
    ============================================================ */
 function wireUI(){
   $('#btnUndo').onclick=undo;
   $('#btnRedo').onclick=redo;
   $('#btnSave').onclick=()=>save(false);
-  $('#btnExport').onclick=exportHTML;
   $('#btnPreview').onclick=togglePreview;
+  $('#btnTour').onclick=startTour;
+  $('#tourSkip').onclick=closeTour;
+  $('#tourNext').onclick=tourNext;
+  $('#tourBack').onclick=tourBack;
+  const em=$('#exportMenu');
+  $('#btnExport').onclick=e=>{e.stopPropagation();em.classList.toggle('hide');};
+  em.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    em.classList.add('hide');
+    if(b.dataset.x==='html') exportHTML();
+    else if(b.dataset.x==='json') exportJSON();
+    else if(b.dataset.x==='embed') copyEmbed();
+  });
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('.tb-menu-wrap')) em.classList.add('hide');
+  });
   $('#btnAngie').onclick=()=>openAngie();
   $('#angieClose').onclick=closeAngie;
   $('#overlay').onclick=closeCmd;
@@ -2494,7 +2873,8 @@ function seedPage(){
     .forEach(k=>addSection(k,{gradient:true},false));
 }
 function init(){
-  if(!load()){ seedPage(); }
+  const firstRun=!load();
+  if(firstRun){ seedPage(); }
   /* migrate: ensure shape */
   if(!state.page.root) state.page=newPage();
   $('#pageTitle').value=state.page.settings.title||'Untitled Page';
@@ -2510,6 +2890,9 @@ function init(){
   syncUndo();
   setDevice('desktop');
   toast('Elementor Angie ready','✦');
+  let tourDone=false;
+  try{tourDone=!!localStorage.getItem('angie_tour_done');}catch(e){}
+  if(!tourDone) setTimeout(startTour,500);
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
 else init();
