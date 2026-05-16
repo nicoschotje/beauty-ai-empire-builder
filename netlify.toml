@@ -1,0 +1,54 @@
+# Mr. Beanie's Greenies — Netlify build & runtime config (P3)
+#
+# Used by BOTH the storefront and dashboard sites if their Netlify
+# project is pointed at this repo. The dashboard site already auto-deploys
+# from /dashboard-v2/. The storefront site (currently manual deploy)
+# will publish from /storefront/ once moved over in P4.
+#
+# Headers below apply to every response served from this Netlify project.
+
+[build]
+  publish = "storefront"
+  # No build command — pure-static storefront, no bundler.
+
+# ─── Security headers ────────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options    = "nosniff"
+    X-Frame-Options           = "SAMEORIGIN"
+    Referrer-Policy           = "strict-origin-when-cross-origin"
+    Permissions-Policy        = "geolocation=(self), camera=(self), microphone=(), payment=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    # Content-Security-Policy is intentionally permissive for now (no nonce
+    # generation in a static deploy); tightened version planned for after
+    # WebAuthn rp_id is finalised post-cutover.
+    Content-Security-Policy   = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.telegram.org https://nominatim.openstreetmap.org; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+
+# ─── SPA fallback ─────────────────────────────────────────────────────
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# ─── Long-cache static assets ─────────────────────────────────────────
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+# ─── No-cache for the HTML shell so deploys are visible instantly ────
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"

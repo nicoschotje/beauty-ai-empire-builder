@@ -158,13 +158,6 @@ function renderCheckout(host, session) {
 function renderPayInfo(box, method, totalPHP) {
   if (!box) return;
   const ss = getStoreSettings();
-  if (method === 'cod') {
-    box.innerHTML = `<div class="pay-info">
-      <h4>Cash on Delivery</h4>
-      <p>Pay our rider in cash when your order arrives. Please prepare the exact amount when possible.</p>
-    </div>`;
-    return;
-  }
   if (method === 'gcash' || method === 'maya') {
     const num   = method === 'gcash' ? ss?.gcash_number : ss?.maya_number;
     const qrUrl = method === 'gcash' ? ss?.gcash_qr_url : ss?.maya_qr_url;
