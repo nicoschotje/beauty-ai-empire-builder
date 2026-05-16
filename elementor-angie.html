@@ -645,13 +645,14 @@ const ICN =(em,st)=>el('icon',{content:em,styles:st||{}});
 const wrap = {textAlign:'center',fontFamily:'Inter, system-ui, sans-serif'};
 
 function gNavbar(o){
+  o=o||{};
   const links=ROW({gap:'30px',alignItems:'center'},
     ['Home','Treatments','Pricing','Contact'].map(l=>
       T(l,{fontSize:'14px',fontWeight:'600',color:'#0d0e14'})));
   return SEC('Navbar',{padding:'18px 40px',background:'#ffffff',
     borderBottom:'1px solid #ececf1',position:'sticky'},[
     ROW({alignItems:'center',justifyContent:'space-between'},[
-      H('h3','Lumière',{fontSize:'22px',fontWeight:'800',color:'#0d0e14',
+      H('h3',o.brand||'Lumière',{fontSize:'22px',fontWeight:'800',color:'#0d0e14',
         fontFamily:"'Playfair Display', serif"}),
       links,
       B('Book Now',{background:'linear-gradient(135deg,#ff2d7e,#c026d3)',color:'#fff',
@@ -680,35 +681,47 @@ function gHero(o){
     sub='A '+adjs[0]+' way to get more done — set up '+o.product
       +' in minutes, and let your whole team move faster.';
   }
-  const sec=SEC('Hero',{padding:'104px 32px',background:bg,color:fg,textAlign:'center'},[
-    T(eyebrow,{fontSize:'13px',letterSpacing:'2.5px',
-      fontWeight:'700',opacity:'.85',marginBottom:'18px'}),
-    H('h1',headline,{fontSize:'62px',fontWeight:'800',lineHeight:'1.05',
-      maxWidth:'820px',margin:'0 auto 20px',fontFamily:"'Playfair Display', serif"}),
-    T(sub,{fontSize:'20px',lineHeight:'1.5',opacity:'.9',
-      maxWidth:'620px',margin:'0 auto 34px'}),
-    ROW({justifyContent:'center',gap:'14px'},[
-      B('Start Free Trial',{background:(grad||dark)?'#ffffff':'linear-gradient(135deg,#ff2d7e,#c026d3)',
-        color:(grad||dark)?'#c026d3':'#fff',padding:'15px 32px',borderRadius:'11px',
-        fontWeight:'700',fontSize:'16px'}),
-      B('Watch Demo',{background:'transparent',color:fg,padding:'15px 30px',
-        borderRadius:'11px',fontWeight:'700',fontSize:'16px',
-        border:'1.5px solid '+((grad||dark)?'#ffffff66':'#0d0e1433')}),
-    ]),
-  ]);
-  sec.children[1].anim={type:'up',duration:800,delay:0};
-  sec.children[2].anim={type:'up',duration:800,delay:120};
-  return sec;
+  /* user-supplied content from the intent parser always wins */
+  if(o.headline) headline=o.headline;
+  if(o.sub) sub=o.sub;
+  const ctaLabels=(o.ctas&&o.ctas.length)?o.ctas.slice(0,3):['Start Free Trial','Watch Demo'];
+  const ctaRow=ROW({justifyContent:'center',gap:'14px'},ctaLabels.map((label,i)=>
+    i===0
+      ? B(label,{background:(grad||dark)?'#ffffff':'linear-gradient(135deg,#ff2d7e,#c026d3)',
+          color:(grad||dark)?'#c026d3':'#fff',padding:'15px 32px',borderRadius:'11px',
+          fontWeight:'700',fontSize:'16px'})
+      : B(label,{background:'transparent',color:fg,padding:'15px 30px',
+          borderRadius:'11px',fontWeight:'700',fontSize:'16px',
+          border:'1.5px solid '+((grad||dark)?'#ffffff66':'#0d0e1433')})));
+  const headEl=H('h1',headline,{fontSize:'62px',fontWeight:'800',lineHeight:'1.05',
+    maxWidth:'820px',margin:'0 auto 20px',fontFamily:"'Playfair Display', serif"});
+  const subEl=T(sub,{fontSize:'20px',lineHeight:'1.5',opacity:'.9',
+    maxWidth:'620px',margin:'0 auto 34px'});
+  headEl.anim={type:'up',duration:800,delay:0};
+  subEl.anim={type:'up',duration:800,delay:120};
+  const kids=[];
+  if(!o.headline) kids.push(T(eyebrow,{fontSize:'13px',letterSpacing:'2.5px',
+    fontWeight:'700',opacity:'.85',marginBottom:'18px'}));
+  kids.push(headEl,subEl,ctaRow);
+  return SEC('Hero',{padding:'104px 32px',background:bg,color:fg,textAlign:'center'},kids);
 }
 
 function gFeatures(o){
-  const n=Math.min(Math.max(o.count||3,2),4);
-  const data=[
-    ['✨','Instant Generation','Describe it once — Angie builds editable, on-brand blocks live.'],
-    ['🎨','Brand-Aware Design','Every section inherits your palette, type scale and spacing rhythm.'],
-    ['⚡','Core Web Vitals','Ships clean, lazy-loaded markup that scores green out of the box.'],
-    ['🔒','Own Your Output','Export portable HTML — no lock-in, no bloated page builders.'],
-  ].slice(0,n);
+  o=o||{};
+  const icons=['✨','🎨','⚡','🔒','🌿','🚀'];
+  let data;
+  if(o.features&&o.features.length){
+    /* user-supplied feature titles/text from the intent parser */
+    data=o.features.slice(0,4).map((f,i)=>[icons[i%icons.length],
+      f.title||('Feature '+(i+1)), f.text||'']);
+  } else {
+    data=[
+      ['✨','Instant Generation','Describe it once — Angie builds editable, on-brand blocks live.'],
+      ['🎨','Brand-Aware Design','Every section inherits your palette, type scale and spacing rhythm.'],
+      ['⚡','Core Web Vitals','Ships clean, lazy-loaded markup that scores green out of the box.'],
+      ['🔒','Own Your Output','Export portable HTML — no lock-in, no bloated page builders.'],
+    ].slice(0,Math.min(Math.max(o.count||3,2),4));
+  }
   return SEC('Features',{padding:'88px 40px',background:'#ffffff'},[
     H('h2','Everything you need to launch',{fontSize:'40px',fontWeight:'800',textAlign:'center',
       marginBottom:'12px',fontFamily:"'Playfair Display', serif",color:'#0d0e14'}),
@@ -728,13 +741,25 @@ function gFeatures(o){
 }
 
 function gPricing(o){
-  const n=Math.min(Math.max(o.count||3,2),4);
-  const tiers=[
-    ['Starter','$0',['1 landing page','Angie basic intents','Community support'],false],
-    ['Studio','$29',['Unlimited pages','Full Angie agent + audits','Export HTML','Priority support'],true],
-    ['Empire','$89',['Everything in Studio','White-label export','Team workspaces','Custom AI training'],false],
-    ['Agency','$199',['Unlimited seats','Client billing','Dedicated success manager'],false],
-  ].slice(0,n);
+  o=o||{};
+  /* tier tuple: [name, price, featureItems, isPopular, period] */
+  let tiers;
+  if(o.tiers&&o.tiers.length){
+    tiers=o.tiers.slice(0,4).map((t,i)=>[
+      t.name||('Tier '+(i+1)), t.price||'$0',
+      t.feature?[t.feature]:['Everything you need to start','Cancel anytime'],
+      false, t.per||'mo']);
+    const mid=Math.min(tiers.length-1,Math.floor(tiers.length/2));
+    tiers[mid][3]=true;
+  } else {
+    const n=Math.min(Math.max(o.count||3,2),4);
+    tiers=[
+      ['Starter','$0',['1 landing page','Angie basic intents','Community support'],false,'mo'],
+      ['Studio','$29',['Unlimited pages','Full Angie agent + audits','Export HTML','Priority support'],true,'mo'],
+      ['Empire','$89',['Everything in Studio','White-label export','Team workspaces','Custom AI training'],false,'mo'],
+      ['Agency','$199',['Unlimited seats','Client billing','Dedicated success manager'],false,'mo'],
+    ].slice(0,n);
+  }
   return SEC('Pricing',{padding:'88px 40px',background:'#0d0e14',color:'#fff'},[
     H('h2','Simple, scalable pricing',{fontSize:'40px',fontWeight:'800',textAlign:'center',
       marginBottom:'12px',fontFamily:"'Playfair Display', serif"}),
@@ -752,7 +777,7 @@ function gPricing(o){
         H('h3',t[0],{fontSize:'20px',fontWeight:'700'}),
         ROW({alignItems:'baseline',gap:'4px',margin:'8px 0'},[
           H('h3',t[1],{fontSize:'46px',fontWeight:'800'}),
-          T('/mo',{fontSize:'15px',opacity:'.7'}),
+          T('/'+(t[4]||'mo'),{fontSize:'15px',opacity:'.7'}),
         ]),
         feat,
         B('Get '+t[0],{background:t[3]?'#fff':'transparent',color:t[3]?'#c026d3':'#fff',
@@ -799,34 +824,44 @@ function gTestimonials(o){
 }
 
 function gCTA(o){
+  o=o||{};
   return SEC('CTA',{padding:'84px 40px',
     background:'linear-gradient(135deg,#ff2d7e,#c026d3)',color:'#fff',textAlign:'center'},[
-    H('h2','Ready to build your empire?',{fontSize:'44px',fontWeight:'800',
+    H('h2',o.headline||'Ready to build your empire?',{fontSize:'44px',fontWeight:'800',
       marginBottom:'14px',fontFamily:"'Playfair Display', serif"}),
-    T('Join thousands of founders launching faster with Angie.',
+    T(o.sub||'Join thousands of founders launching faster with Angie.',
       {fontSize:'19px',opacity:'.92',marginBottom:'30px'}),
     ROW({justifyContent:'center'},[
-      B('Start Building Free',{background:'#fff',color:'#c026d3',padding:'16px 38px',
+      B(o.ctaLabel||(o.ctas&&o.ctas[0])||'Start Building Free',
+        {background:'#fff',color:'#c026d3',padding:'16px 38px',
         borderRadius:'12px',fontWeight:'800',fontSize:'17px'}),
     ]),
   ]);
 }
 
 function gFAQ(o){
-  const n=Math.min(Math.max((o&&o.count)||4,2),6);
-  const items=[
-    ['Do I need to know how to code?','Not at all. Describe what you want in plain English and Angie generates editable visual blocks. You can fine-tune everything with the inspector.'],
-    ['Is the AI really offline?','Yes — Angie runs a deterministic intent engine in your browser. No API keys, no network calls, fully private.'],
-    ['Can I export my page?','Absolutely. Export clean, portable HTML, structured JSON, or a ready-to-paste embed snippet.'],
-    ['Will it match my brand?','Every block inherits your palette and type scale. The audit agent flags off-brand contrast and spacing live.'],
-    ['Can my team collaborate?','Studio and Empire plans include shared workspaces so your whole team can edit and audit pages together.'],
-    ['Where is my data stored?','Your page lives in your browser via localStorage. Nothing is uploaded — export whenever you want a copy.'],
-  ].slice(0,n);
+  o=o||{};
+  let items;
+  if(o.items&&o.items.length){
+    /* user-supplied questions from the intent parser */
+    items=o.items.map(it=>({q:it.q,
+      a:it.a||'Add your answer here — click to edit this text.'}));
+  } else {
+    const n=Math.min(Math.max(o.count||4,2),6);
+    items=[
+      ['Do I need to know how to code?','Not at all. Describe what you want in plain English and Angie generates editable visual blocks. You can fine-tune everything with the inspector.'],
+      ['Is the AI really offline?','Yes — Angie runs a deterministic intent engine in your browser. No API keys, no network calls, fully private.'],
+      ['Can I export my page?','Absolutely. Export clean, portable HTML, structured JSON, or a ready-to-paste embed snippet.'],
+      ['Will it match my brand?','Every block inherits your palette and type scale. The audit agent flags off-brand contrast and spacing live.'],
+      ['Can my team collaborate?','Studio and Empire plans include shared workspaces so your whole team can edit and audit pages together.'],
+      ['Where is my data stored?','Your page lives in your browser via localStorage. Nothing is uploaded — export whenever you want a copy.'],
+    ].slice(0,n).map(i=>({q:i[0],a:i[1]}));
+  }
   return SEC('FAQ',{padding:'84px 40px',background:'#fff'},[
     H('h2','Frequently asked questions',{fontSize:'38px',fontWeight:'800',textAlign:'center',
       marginBottom:'40px',fontFamily:"'Playfair Display', serif",color:'#0d0e14'}),
     COL({maxWidth:'720px',margin:'0 auto'},[
-      el('faq',{props:{items:items.map(i=>({q:i[0],a:i[1]}))},styles:{}}),
+      el('faq',{props:{items},styles:{}}),
     ]),
   ]);
 }
@@ -928,6 +963,14 @@ function gTeam(o){
 }
 
 function gFooter(o){
+  o=o||{};
+  if(o.text){
+    /* user-supplied footer line from the intent parser */
+    return SEC('Footer',{padding:'52px 40px',background:'#08090e',color:'#fff',
+      textAlign:'center'},[
+      T(o.text,{fontSize:'14px',color:'#cfd0e0',lineHeight:'1.7'}),
+    ]);
+  }
   const colLinks=(title,links)=>COL({},[
     H('h4',title,{fontSize:'14px',fontWeight:'700',marginBottom:'12px',color:'#fff'}),
     ...links.map(l=>T(l,{fontSize:'13px',color:'#9a9bb0',marginBottom:'7px'})),
@@ -1010,36 +1053,174 @@ function extractAdjectives(t){
   return ADJ_POOL.filter(a=>new RegExp('\\b'+a+'\\b').test(t));
 }
 
+/* ---------- quoted-string extraction ----------
+   Recognises straight, curly and double quotes. Curly quotes are
+   normalised to straight ones first (a 1:1 char swap, so indices stay
+   aligned with the original text). Limitation: a stray apostrophe in
+   un-quoted prose can confuse straight single-quote pairing — users
+   should prefer double or curly quotes for content with apostrophes. */
+function extractQuotes(text){
+  const norm=text.replace(/[‘’]/g,"'").replace(/[“”]/g,'"');
+  const out=[]; const re=/"([^"]*)"|'([^']*)'/g; let m;
+  while((m=re.exec(norm))){
+    const val=(m[1]!==undefined?m[1]:m[2]).trim();
+    if(val) out.push({value:val,start:m.index,end:re.lastIndex});
+  }
+  return out;
+}
+
+/* split a compound instruction into per-section segments by locating
+   section keywords that are NOT inside a quoted string */
+function splitSegments(raw){
+  const lower=raw.toLowerCase();
+  const ranges=extractQuotes(raw).map(q=>[q.start,q.end]);
+  const inQuote=i=>ranges.some(r=>i>=r[0]&&i<r[1]);
+  let hits=[];
+  for(const [kind,re] of SECTION_PATTERNS){
+    const g=new RegExp(re.source,'gi'); let m;
+    while((m=g.exec(lower))){
+      if(!inQuote(m.index)) hits.push({kind,idx:m.index});
+    }
+  }
+  hits.sort((a,b)=>a.idx-b.idx);
+  /* collapse consecutive hits of the same kind (e.g. "pricing"+"tiers") */
+  const dedup=[];
+  for(const h of hits){
+    const prev=dedup[dedup.length-1];
+    if(prev && (prev.kind===h.kind || h.idx-prev.idx<4)) continue;
+    dedup.push(h);
+  }
+  const segments=dedup.map((h,i)=>({
+    kind:h.kind,
+    text:raw.slice(h.idx, i+1<dedup.length?dedup[i+1].idx:raw.length),
+  }));
+  const preamble=dedup.length?raw.slice(0,dedup[0].idx):raw;
+  const pq=extractQuotes(preamble);
+  return {segments, brand:pq[0]?pq[0].value:null};
+}
+
+/* assign each quote in a segment to a content slot by reading the
+   label keyword that precedes it (headline / subtext / cta / list) */
+function assignSlots(text,quotes){
+  const slots={headline:[],sub:[],cta:[],items:[]};
+  let ctx='headline', prev=0;
+  quotes.forEach((q,i)=>{
+    const gap=text.slice(prev,q.start).toLowerCase();
+    if(/head(line|ing)?|title/.test(gap)) ctx='headline';
+    else if(/sub(text|title|head)|description|tagline|paragraph/.test(gap)) ctx='sub';
+    else if(/\bctas?\b|button|call to action/.test(gap)) ctx='cta';
+    else if(/items?|questions?|features?|tiers?/.test(gap)) ctx='items';
+    else if(i===0) ctx='headline';
+    /* otherwise keep the current context so e.g. a list of CTAs stays a list */
+    slots[ctx].push(q.value);
+    prev=q.end;
+  });
+  return slots;
+}
+
+/* pair feature titles with their following body text */
+function parseFeatureItems(text,quotes){
+  const feats=[]; let prev=0;
+  quotes.forEach(q=>{
+    const gap=text.slice(prev,q.start).toLowerCase(); prev=q.end;
+    const last=feats[feats.length-1];
+    if(last && !last.text && /\btext\b|\bdesc|\bbody\b|says|caption|reads/.test(gap)){
+      last.text=q.value;
+    } else {
+      feats.push({title:q.value,text:''});
+    }
+  });
+  return feats;
+}
+
+/* parse pricing tiers — handles quoted names, bare Capitalised names,
+   $price, /period and an optional "for X" feature line */
+function parsePricingTiers(text){
+  let body=text;
+  const ci=text.search(/:|tiers?|plans?|packages?/i);
+  if(ci>=0) body=text.slice(ci);
+  const tiers=[];
+  body.split(/,|\band\b/i).forEach(c=>{
+    if(!/\$/.test(c)) return;
+    const price=(c.match(/\$\s?\d+(?:\.\d+)?/)||[''])[0].replace(/\s/g,'');
+    const perM=c.match(/\/\s?(month|mo|year|yr|week|wk|annually|annual)/i);
+    const per=perM?perM[1].toLowerCase().replace('month','mo').replace('year','yr')
+      .replace('week','wk').replace('annually','yr').replace('annual','yr'):'mo';
+    let name=(extractQuotes(c)[0]||{}).value;
+    if(!name){
+      const um=c.match(/([A-Z][A-Za-z0-9]+(?:\s[A-Z][A-Za-z]+)?)\s*(?:[:\-]|at)?\s*\$/);
+      name=um?um[1].trim():null;
+    }
+    const feat=(c.match(/\bfor\s+([^,.;]+)/i)||[])[1];
+    tiers.push({name:name||('Tier '+(tiers.length+1)), price:price||'$0',
+      per, feature:feat?feat.trim():null});
+  });
+  return tiers;
+}
+
+/* find an un-quoted brand name ("brand name BrewBox", "named Acme") */
+function extractBrand(text){
+  let m=text.match(/brand(?:\s*name)?\s+(?:is\s+|called\s+)?([A-Z][\w&.\- ]*?)(?:[.,;!?]|$)/);
+  if(m) return m[1].trim();
+  m=text.match(/\bnamed?\s+([A-Z][\w&.\- ]*?)(?:[.,;!?]|$)/);
+  return m?m[1].trim():null;
+}
+
+/* turn one segment into a {kind,opts} pair with extracted content */
+function parseSegment(kind,text,g){
+  const quotes=extractQuotes(text);
+  const lc=' '+text.toLowerCase()+' ';
+  const opts={gradient:g.gradient,dark:g.dark};
+  if(kind==='navbar'){
+    opts.brand=(quotes[0]&&quotes[0].value)||extractBrand(text)||g.brand;
+  } else if(kind==='hero'){
+    const s=assignSlots(text,quotes);
+    if(s.headline.length) opts.headline=s.headline[0];
+    if(s.sub.length) opts.sub=s.sub[0];
+    if(s.cta.length) opts.ctas=s.cta;
+  } else if(kind==='features'){
+    opts.features=parseFeatureItems(text,quotes);
+    opts.count=opts.features.length||numNear(lc,'features?|columns?|cards?|items?')||3;
+  } else if(kind==='pricing'){
+    opts.tiers=parsePricingTiers(text);
+    opts.count=opts.tiers.length||numNear(lc,'tiers?|plans?|packages?|columns?')||3;
+  } else if(kind==='faq'){
+    opts.items=quotes.map(q=>({q:q.value,a:''}));
+    opts.count=opts.items.length||numNear(lc,'items?|questions?|faqs?|rows?')||4;
+  } else if(kind==='footer'){
+    if(quotes.length) opts.text=quotes[quotes.length-1].value;
+  } else if(kind==='cta'){
+    const s=assignSlots(text,quotes);
+    if(s.headline.length) opts.headline=s.headline[0];
+    if(s.sub.length) opts.sub=s.sub[0];
+    if(s.cta.length) opts.ctaLabel=s.cta[0];
+  }
+  return {kind,opts};
+}
+
 function parseIntent(raw){
-  const text=' '+raw.toLowerCase().trim()+' ';
-  const gradient=/\bgradient\b/.test(text);
-  const dark=/\bdark\b/.test(text);
-  /* whole-page template request */
-  if(FULLPAGE.test(text)){
-    const product=extractProduct(text);
-    const adjectives=extractAdjectives(text);
+  const lower=raw.toLowerCase();
+  const gradient=/\bgradient\b/.test(lower);
+  const dark=/\bdark\b/.test(lower);
+  const wantsFullPage=FULLPAGE.test(lower);
+  /* 1. compound / section-by-section request — split and parse each */
+  const seg=splitSegments(raw);
+  if(seg.segments.length){
+    const globals={gradient,dark,brand:seg.brand};
+    const sections=seg.segments.map(s=>parseSegment(s.kind,s.text,globals));
+    return {sections, fresh:wantsFullPage||sections.length>=4};
+  }
+  /* 2. whole-page template request with no explicit sections named */
+  if(wantsFullPage){
+    const t=' '+lower+' ';
+    const product=extractProduct(t), adjectives=extractAdjectives(t);
     return {
       template:true, product, adjectives,
       sections:TEMPLATE_ORDER.map(k=>({kind:k,
         opts:{gradient:true,dark:false,product,adjectives}})),
     };
   }
-  /* section-by-section request */
-  const found=[];
-  for(const [kind,re] of SECTION_PATTERNS){
-    const m=text.match(re);
-    if(m) found.push({kind,idx:m.index});
-  }
-  if(!found.length) return {sections:[],unknown:true};
-  found.sort((a,b)=>a.idx-b.idx);
-  const sections=found.map(f=>{
-    const o={gradient,dark};
-    if(f.kind==='pricing') o.count=numNear(text,'tiers?|plans?|packages?|columns?')||3;
-    if(f.kind==='features') o.count=numNear(text,'features?|benefits?|cards?|columns?|items?')||3;
-    if(f.kind==='faq') o.count=numNear(text,'items?|questions?|faqs?|rows?')||4;
-    return {kind:f.kind,opts:o};
-  });
-  return {sections};
+  return {sections:[],unknown:true};
 }
 
 /* mutation commands on the current selection / page */
@@ -1435,12 +1616,13 @@ function generateFromIntent(raw){
   const res=parseIntent(raw);
   if(res.unknown||!res.sections.length) return null;
   snapshot();
-  if(res.template) state.page.root.children=[];   /* full page = fresh build */
+  if(res.template||res.fresh) state.page.root.children=[]; /* full page = fresh build */
   const created=res.sections.map(s=>addSection(s.kind,s.opts,false));
   renderAll();
   if(created.length) selectNode(created[0].id);
   audit();
-  state._lastResult={template:!!res.template,product:res.product,count:created.length};
+  state._lastResult={template:!!res.template,fresh:!!(res.template||res.fresh),
+    product:res.product,count:created.length};
   return created;
 }
 
@@ -2004,11 +2186,12 @@ function angieSend(text){
   const created=generateFromIntent(text);
   if(created){
     const r=state._lastResult||{};
-    if(r.template){
+    if(r.fresh){
+      const names=created.map(c=>c.props.label).join(', ');
       agMsg('a',`Built a complete <b>${created.length}-section</b> page`
-        +`${r.product?' for <b>'+esc(r.product)+'</b>':''} — navbar, hero, features, `
-        +`stats, testimonials, pricing, FAQ, CTA and footer. Every block is live `
-        +`and editable. Check the <b>Audit</b> and <b>Speed</b> tabs for a health report.`);
+        +`${r.product?' for <b>'+esc(r.product)+'</b>':''}: <b>${esc(names)}</b>. `
+        +`I pulled your wording straight into each block — every one is live `
+        +`and editable. Check the <b>Audit</b> and <b>Speed</b> tabs too.`);
     } else {
       const names=created.map(c=>c.props.label).join(', ');
       agMsg('a',`Done — I added <b>${created.length}</b> section`
