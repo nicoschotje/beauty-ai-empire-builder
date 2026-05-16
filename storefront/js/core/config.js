@@ -2,8 +2,8 @@
  * All hardcoded constants live here.
  */
 
-export const SUPABASE_URL  = 'https://ckmnhgattkiziuykhczo.supabase.co';
-export const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrbW5oZ2F0dGtpeml1eWtoY3pvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NjU1MzksImV4cCI6MjA4ODM0MTUzOX0.l2ErPyJe6q2sI4UpNtRp9qRfeVkfdrHSOdkensj83IA';
+export const SUPABASE_URL  = 'https://ihnnipynpdtcbdfbpemq.supabase.co';
+export const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlobm5pcHlucGR0Y2JkZmJwZW1xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NDIwNjcsImV4cCI6MjA5NDQxODA2N30.RgSQY_odbIR0vdfGqcdN0aTDyKlBcbrDC35iAKSGRKo';
 export const EDGE_URL      = `${SUPABASE_URL}/functions/v1`;
 
 // Brand

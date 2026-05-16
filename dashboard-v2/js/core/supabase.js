@@ -4,7 +4,7 @@
 // without any data-layer divergence. The admin secret is captured at PIN entry
 // and forwarded as x-admin-secret on every request (RLS gateway).
 
-const SUPA_URL = 'https://ckmnhgattkiziuykhczo.supabase.co';
+const SUPA_URL = 'https://ihnnipynpdtcbdfbpemq.supabase.co';
 // NOTE: anon key is intentionally public — same one the storefront uses.
 // Replace with the project's actual anon key when wiring to a real environment.
 const SUPA_KEY = window.__MBG_SUPA_KEY__ || 'PUBLIC_ANON_KEY_PLACEHOLDER';
