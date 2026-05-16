@@ -102,6 +102,43 @@ function check(name,texts,expected,sections,note){
   ],r.sections,
     'compound prompt split into 6 ordered segments, each parsed for its own content');
 
+  /* ---- regression-limitation fixes ---- */
+
+  r=await run('FAQ with "Is it free?" answer "Yes, completely free." '
+    +'and "How do I cancel?" answer "Go to Settings."');
+  const lastSec=r.D.querySelector('#page > .blk-section:last-child');
+  const faqqs=[...lastSec.querySelectorAll('[data-edit="faqq"]')].map(e=>e.textContent.trim());
+  check('7. FAQ answers parsed',r.texts,
+    ['Is it free?','Yes, completely free.','How do I cancel?','Go to Settings.'],
+    r.sections,'answer-labelled quotes attach to the prior question — '
+    +faqqs.length+' questions parsed (expected 2)');
+  results[results.length-1]=results[results.length-1]&&faqqs.length===2;
+  if(faqqs.length!==2) console.log('       FAIL: got '+faqqs.length+' questions, expected 2');
+
+  r=await run('3-column feature grid: "🔒" "Secure", "⚡" "Fast", "🎯" "Precise"');
+  check('8. Feature emoji icons parsed',r.texts,
+    ['🔒','Secure','⚡','Fast','🎯','Precise'],r.sections,
+    'emoji-only quotes become the card icon, the next quote its title');
+
+  r=await run('add a hero, then add another hero for the mobile app');
+  const heroes=r.sections.filter(s=>s==='Hero').length;
+  const dupPass=heroes===3;   /* 1 seeded + 2 generated */
+  results.push(dupPass);
+  console.log((dupPass?'PASS':'FAIL')+' · 9. Duplicate section types');
+  console.log('       parser: repeated "hero" with an introducer word in between '
+    +'yields separate blocks — '+heroes+' Hero sections (1 seeded + 2 new)');
+  console.log('       sections: ['+r.sections.join(', ')+']');
+
+  r=await run("our company's hero with headline 'Big News'");
+  const apostroPass=has(r.texts,'Big News')
+    && !r.texts.some(t=>/hero with headline/.test(t));
+  results.push(apostroPass);
+  console.log((apostroPass?'PASS':'FAIL')+' · 10. Apostrophe in unquoted prose');
+  console.log('       parser: "company\\u2019s" apostrophe ignored, \\u2018Big News\\u2019 '
+    +'parsed as the headline (no garbage quote)');
+  console.log('       sections: ['+r.sections.join(', ')+']');
+  if(!apostroPass) console.log('       texts: '+JSON.stringify(r.texts.slice(0,8)));
+
   const pass=results.filter(Boolean).length;
   console.log('\n──────────────────────────────');
   console.log('RESULT: '+pass+'/'+results.length+' content tests passed');

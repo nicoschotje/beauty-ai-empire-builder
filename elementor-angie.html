@@ -712,7 +712,7 @@ function gFeatures(o){
   let data;
   if(o.features&&o.features.length){
     /* user-supplied feature titles/text from the intent parser */
-    data=o.features.slice(0,4).map((f,i)=>[icons[i%icons.length],
+    data=o.features.slice(0,4).map((f,i)=>[f.icon||icons[i%icons.length],
       f.title||('Feature '+(i+1)), f.text||'']);
   } else {
     data=[
@@ -1061,7 +1061,9 @@ function extractAdjectives(t){
    should prefer double or curly quotes for content with apostrophes. */
 function extractQuotes(text){
   const norm=text.replace(/[‘’]/g,"'").replace(/[“”]/g,'"');
-  const out=[]; const re=/"([^"]*)"|'([^']*)'/g; let m;
+  /* a single quote only opens a string when NOT preceded by a letter,
+     so apostrophes inside words ("don't", "company's") are ignored */
+  const out=[]; const re=/"([^"]*)"|(?<![a-zA-Z])'([^']*)'/g; let m;
   while((m=re.exec(norm))){
     const val=(m[1]!==undefined?m[1]:m[2]).trim();
     if(val) out.push({value:val,start:m.index,end:re.lastIndex});
@@ -1083,11 +1085,20 @@ function splitSegments(raw){
     }
   }
   hits.sort((a,b)=>a.idx-b.idx);
-  /* collapse consecutive hits of the same kind (e.g. "pricing"+"tiers") */
+  /* dedup: drop synonyms sitting right next to each other, and collapse a
+     repeated section type UNLESS a section-introducer word ("then",
+     "another", "add"…) appears between the two occurrences — that lets
+     "add a hero, then another hero" yield two heroes while "pricing
+     section with three tiers" stays a single pricing block */
+  const NEWSEG=/\b(then|another|other|second|third|next|also|add|plus|new|followed by)\b/;
   const dedup=[];
   for(const h of hits){
     const prev=dedup[dedup.length-1];
-    if(prev && (prev.kind===h.kind || h.idx-prev.idx<4)) continue;
+    if(prev){
+      if(h.idx-prev.idx<4) continue;
+      if(prev.kind===h.kind &&
+         !NEWSEG.test(raw.slice(prev.idx,h.idx).toLowerCase())) continue;
+    }
     dedup.push(h);
   }
   const segments=dedup.map((h,i)=>({
@@ -1120,14 +1131,24 @@ function assignSlots(text,quotes){
 
 /* pair feature titles with their following body text */
 function parseFeatureItems(text,quotes){
-  const feats=[]; let prev=0;
+  /* a quoted token that is just an emoji / short symbol is an icon,
+     not a title or body — attach it to the adjacent feature */
+  const isIcon=v=>/^\p{Emoji}/u.test(v) && [...v].length<=3;
+  const feats=[]; let prev=0, pendingIcon='';
   quotes.forEach(q=>{
     const gap=text.slice(prev,q.start).toLowerCase(); prev=q.end;
+    if(isIcon(q.value)){
+      const last=feats[feats.length-1];
+      if(last && !last.icon) last.icon=q.value;   /* icon stated after title */
+      else pendingIcon=q.value;                   /* icon stated before title */
+      return;
+    }
     const last=feats[feats.length-1];
     if(last && !last.text && /\btext\b|\bdesc|\bbody\b|says|caption|reads/.test(gap)){
       last.text=q.value;
     } else {
-      feats.push({title:q.value,text:''});
+      feats.push({title:q.value,text:'',icon:pendingIcon});
+      pendingIcon='';
     }
   });
   return feats;
@@ -1185,7 +1206,20 @@ function parseSegment(kind,text,g){
     opts.tiers=parsePricingTiers(text);
     opts.count=opts.tiers.length||numNear(lc,'tiers?|plans?|packages?|columns?')||3;
   } else if(kind==='faq'){
-    opts.items=quotes.map(q=>({q:q.value,a:''}));
+    /* each quote is a question; a quote whose preceding gap says
+       "answer"/"says"/"reads"/"reply" is the answer to the prior one.
+       (Label-driven rather than blind alternating, so a plain list of
+       questions is never mis-read as question/answer pairs.) */
+    opts.items=[]; let fprev=0;
+    quotes.forEach(q=>{
+      const gap=text.slice(fprev,q.start).toLowerCase(); fprev=q.end;
+      const last=opts.items[opts.items.length-1];
+      if(last && !last.a && /\banswers?\b|\bsays\b|\breads\b|\breply\b/.test(gap)){
+        last.a=q.value;
+      } else {
+        opts.items.push({q:q.value,a:''});
+      }
+    });
     opts.count=opts.items.length||numNear(lc,'items?|questions?|faqs?|rows?')||4;
   } else if(kind==='footer'){
     if(quotes.length) opts.text=quotes[quotes.length-1].value;
