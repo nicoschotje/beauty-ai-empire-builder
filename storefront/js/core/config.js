@@ -26,7 +26,6 @@ export const PAYMENT_METHODS = [
   { id: 'gcash',         label: 'GCash',         icon: 'G',  needsReceipt: true  },
   { id: 'maya',          label: 'Maya',          icon: 'M',  needsReceipt: true  },
   { id: 'bank_transfer', label: 'Bank Transfer', icon: 'B',  needsReceipt: true  },
-  { id: 'cod',           label: 'Cash on Delivery', icon: 'C', needsReceipt: false },
   { id: 'usdt',          label: 'USDT (Crypto)',   icon: 'U', needsReceipt: true  }
 ];
 
