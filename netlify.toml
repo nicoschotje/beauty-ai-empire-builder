@@ -1,0 +1,3 @@
+[build]
+  command = "npm run build && cp -r store dist/store && cp -r dashboard-v2 dist/dashboard-v2"
+  publish = "dist"
